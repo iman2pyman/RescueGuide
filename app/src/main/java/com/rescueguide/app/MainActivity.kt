@@ -126,7 +126,7 @@ private fun HomeScreen(onSelectModule: (AppModule) -> Unit) {
             }
         }
         Spacer(Modifier.height(8.dp))
-        Text("نسخه 0.28.0-dev", style = MaterialTheme.typography.labelMedium)
+        Text("نسخه 0.29.0-dev", style = MaterialTheme.typography.labelMedium)
     }
 }
 
