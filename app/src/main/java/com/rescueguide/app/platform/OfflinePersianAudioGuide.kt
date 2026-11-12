@@ -21,7 +21,7 @@ class OfflinePersianAudioGuide(context: Context) {
             val path = "audio/fa/${prompt.assetName}"
             // Copy through the app cache so playback also works when aapt compresses MP3 assets.
             val audioFile = File.createTempFile("rescueguide-", ".mp3", appContext.cacheDir)
-            appContext.assets.open(path).use { input -> audioFile.outputStream().use(input::copyTo) }
+            appContext.assets.open(path).use { input -> audioFile.outputStream().use { output -> input.copyTo(output) } }
             cachedAudioFile = audioFile
             val next = MediaPlayer()
             next.setDataSource(audioFile.absolutePath)
