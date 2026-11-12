@@ -1,0 +1,18 @@
+# Gradle / Android build outputs
+.gradle/
+**/build/
+local.properties
+*.iml
+.idea/
+.DS_Store
+Thumbs.db
+.externalNativeBuild/
+.cxx/
+
+# Signing material — never commit private keys or passwords
+*.jks
+*.keystore
+keystore.properties
+
+# Local logs
+*.log
