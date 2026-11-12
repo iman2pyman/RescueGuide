@@ -29,3 +29,7 @@ The GitHub workflow is located at `.github/workflows/android.yml`. The extracted
 - Persian recognition and TTS depend on services and voice data installed on the target handset; physical-device testing is required.
 - No Android build, APK, emulator test or device test has yet been verified from this workspace. GitHub Actions is the next verification step.
 - The app is not a medical device and does not replace emergency dispatch or hands-on training.
+
+## Import workflow maintenance
+
+The ZIP import workflow rebases its extracted-source commit onto the latest `main` branch before pushing, and leaves workflow definitions under separate maintenance.
