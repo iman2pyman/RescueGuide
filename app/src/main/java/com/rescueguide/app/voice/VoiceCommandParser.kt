@@ -4,6 +4,9 @@ package com.rescueguide.app.voice
 enum class VoiceIntent { CONFIRM, DECLINE, REPEAT, BACK, UNKNOWN }
 
 object PersianVoiceCommandParser {
+    /** True only when the recognizer returned at least one Persian/Arabic-script character. */
+    fun containsPersianScript(raw: String): Boolean = raw.any { it in '\\u0600'..'\\u06FF' }
+
     fun parse(raw: String): VoiceIntent {
         val value = normalize(raw)
         if (value.isBlank()) return VoiceIntent.UNKNOWN
