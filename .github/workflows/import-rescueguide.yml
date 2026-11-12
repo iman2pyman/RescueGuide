@@ -39,6 +39,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
+          # The default Actions token cannot add workflow files.
+          # Keep android.yml out of this commit; it will be added separately.
+          git reset -q -- .github/workflows/android.yml || true
           if git diff --cached --quiet; then
             echo "No extracted source changes to commit."
           else
