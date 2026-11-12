@@ -1,40 +1,20 @@
 # RescueGuide
 
-Persian Android prototype for voice-assisted basic life support (BLS) and choking guidance.
+اپلیکیشن اندرویدی فارسی برای راهنمای مرحله‌به‌مرحله احیای پایه (BLS) و مدیریت خفگی در بزرگسال، کودک و شیرخوار.
 
-## Source snapshot
+## امکانات موجود در سورس
+- رابط کاربری فارسی با تم پزشکی و آیکن اختصاصی قلب/نوار قلب
+- مسیرهای جداگانه BLS و خفگی
+- انتخاب گروه سنی و نوع امدادگر
+- دستورهای صوتی فارسی آفلاین به‌صورت MP3 همراه برنامه
+- کنترل لمسی و فرمان صوتی اختیاری (تأیید، تکرار، بازگشت و گزارش بازگشت تنفس طبیعی)
+- مترونوم CPR قابل تنظیم ۱۰۰ تا ۱۲۰ فشار در دقیقه
+- شماره‌گیر اورژانس ایران ۱۱۵
 
-`0.29.0-dev` — complete snapshot of the source currently implemented in this repository. It is **not** a finished or clinically approved app, and it is not an APK.
+## مستندات
+- [راهنمای استفاده فارسی](docs/APP_USAGE_FA.md)
+- [وضعیت واقعی توسعه و موارد تأییدنشده](PROJECT_STATUS.md)
+- [راهنمای ساخت با گوشی](docs/PHONE_ONLY_GITHUB_BUILD_FA.md)
 
-## Included implementation
-
-- Persian Android/Jetpack Compose home screen and navigation shell.
-- BLS and choking module selection, adult/child/infant manual routing, and rescuer-type selection.
-- Review gate; clinical guidance remains disabled.
-- Strict Persian voice-command phrase parser for confirm, decline, repeat and back; parsed commands are not connected to clinical actions.
-- Opt-in Android speech-recognition test: voice mode is considered verified only after a valid Persian-script control phrase is recognized; otherwise the UI stays in touch-first fallback. Microphone access is requested only after the user starts the test.
-- Touch controls remain available even after voice verification. Recognition may depend on handset speech service and network.
-- Offline Persian audio playback foundation (`OfflinePersianAudioGuide`) that reads bundled recordings from `app/src/main/assets/audio/fa/`; the final MP3 recordings are not included yet and clinical prompts remain disabled.
-- Iran emergency dialer shortcut using `ACTION_DIAL` for 115.
-- Unit tests for domain policies, patient routing, navigation and voice parsing.
-- GitHub Actions workflow to install Java 17, Gradle 8.13 and Android SDK 36, then run unit tests, lint and debug APK assembly.
-
-## Build through GitHub Actions
-
-The GitHub workflow is located at `.github/workflows/android.yml`. The extracted project files must be placed in the **root** of the repository with their directory structure preserved. Uploading the ZIP file alone does not extract it on GitHub. Then open **Actions** and inspect the `RescueGuide Android CI` run. A debug APK is published as an artifact only after all build/test/lint steps succeed. See `docs/UPLOAD_TO_GITHUB_FA.md` and `docs/PHONE_ONLY_GITHUB_BUILD_FA.md`.
-
-## Important limits
-
-- Clinical BLS and choking pathways are not implemented or active. No algorithm or medical illustration is enabled.
-- Clinical content must be checked against AHA/AAP 2025 and approved explicitly by the user's specialist before activation or publication.
-- Advanced life support is outside this version's scope.
-- Offline audio playback is designed not to depend on handset TTS. Final Persian recordings still need to be produced, reviewed and approved before being bundled.
-- Persian speech recognition is optional, varies by handset/service and may require a Persian language pack and network access. The app requires a successful Persian control-phrase test before marking voice recognition verified; otherwise it remains touch-first. Touch controls are always available and voice must never block time-critical actions.
-- GitHub Actions run `43295798640` completed Gradle validation, unit tests, Android lint and debug APK assembly successfully. This is a CI build, not a physical-device test or clinical approval.
-- The app is not a medical device and does not replace emergency dispatch or hands-on training.
-
-## Import workflow maintenance
-
-The ZIP import workflow rebases its extracted-source commit onto the latest `main` branch before pushing, and leaves workflow definitions under separate maintenance.
-
-The app includes a Persian recognition verification test and a touch-first fallback; see `docs/PERSIAN_VOICE_AND_OFFLINE_AUDIO_FA.md` for the Persian recognition fallback and offline audio asset plan.
+## دامنه و هشدار
+این نسخه شامل BLS و خفگی است؛ احیای پیشرفته در محدوده نیست. برنامه جایگزین تماس با اورژانس، دستور اپراتور یا آموزش عملی نیست. صدای فارسی همراه برنامه ماشینی است و باید روی گوشی واقعی ارزیابی شود. هنوز APK نهایی ساخته و روی دستگاه واقعی تأیید نشده است.

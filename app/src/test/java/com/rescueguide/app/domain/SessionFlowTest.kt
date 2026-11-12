@@ -34,14 +34,38 @@ class SessionFlowTest {
         )
         state = SessionFlowReducer.reduce(state, SessionFlowAction.ChoosePatient(PatientGroup.CHILD))
         state = SessionFlowReducer.reduce(state, SessionFlowAction.ChooseRescuer(RescuerType.TRAINED_RESCUER))
+        state = SessionFlowReducer.reduce(state, SessionFlowAction.ChooseRescueBreaths(true))
         assertTrue(state.selection!!.isComplete)
         state = SessionFlowReducer.reduce(state, SessionFlowAction.ContinueToReviewGate)
         assertEquals(SessionPage.REVIEW_GATE, state.page)
     }
 
+    @Test fun blsSelectionRequiresExplicitRescueBreathCapability() {
+        var state = SessionFlowReducer.reduce(SessionFlowState(), SessionFlowAction.ChooseModule(AppModule.BASIC_LIFE_SUPPORT))
+        state = SessionFlowReducer.reduce(state, SessionFlowAction.ChoosePatient(PatientGroup.ADULT))
+        state = SessionFlowReducer.reduce(state, SessionFlowAction.ChooseRescuer(RescuerType.LAY_RESCUER))
+        assertFalse(state.selection!!.isComplete)
+        state = SessionFlowReducer.reduce(state, SessionFlowAction.ChooseRescueBreaths(false))
+        assertTrue(state.selection!!.isComplete)
+    }
+
+    @Test fun approvedSelectionCanEnterAndNavigateActivePath() {
+        var state = SessionFlowReducer.reduce(SessionFlowState(), SessionFlowAction.ChooseModule(AppModule.BASIC_LIFE_SUPPORT))
+        state = SessionFlowReducer.reduce(state, SessionFlowAction.ChoosePatient(PatientGroup.ADULT))
+        state = SessionFlowReducer.reduce(state, SessionFlowAction.ChooseRescuer(RescuerType.LAY_RESCUER))
+        state = SessionFlowReducer.reduce(state, SessionFlowAction.ChooseRescueBreaths(false))
+        state = SessionFlowReducer.reduce(state, SessionFlowAction.ContinueToReviewGate)
+        state = SessionFlowReducer.reduce(state, SessionFlowAction.StartPath)
+        assertEquals(SessionPage.ACTIVE_PATH, state.page)
+        state = SessionFlowReducer.reduce(state, SessionFlowAction.NextStep)
+        assertEquals(1, state.activeStepIndex)
+        state = SessionFlowReducer.reduce(state, SessionFlowAction.PreviousStep)
+        assertEquals(0, state.activeStepIndex)
+    }
+
     @Test fun backFromGatePreservesChoicesAndBackFromSelectionReturnsHome() {
         var state = SessionFlowState(page = SessionPage.SELECTION,
-            selection = SessionSelection(AppModule.CHOKING, PatientGroup.ADULT, RescuerType.LAY_RESCUER))
+            selection = SessionSelection(AppModule.CHOKING, PatientGroup.ADULT, RescuerType.LAY_RESCUER, canProvideRescueBreaths = false))
         state = SessionFlowReducer.reduce(state, SessionFlowAction.ContinueToReviewGate)
         state = SessionFlowReducer.reduce(state, SessionFlowAction.Back)
         assertEquals(SessionPage.SELECTION, state.page)

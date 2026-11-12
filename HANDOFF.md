@@ -1,34 +1,37 @@
-# RescueGuide handoff — 0.29.0-dev
+# RescueGuide handoff — 0.30.0-dev (local worktree)
 
-## Scope and safeguards
-- Persian Android app shell; current intended scope is Basic Life Support and choking only. Advanced life support remains deferred.
-- Target references for future clinical authoring: AHA/AAP 2025. The actual clinical pathways have not yet been implemented or approved.
-- Iran only, emergency number 115, opened with ACTION_DIAL. No CALL_PHONE permission.
-- Adult, child and infant group selection; newborn resuscitation at birth is out of scope.
-- Clinical content must remain disabled until the user explicitly reviews and approves it as the resuscitation specialist.
-- Do not add medical illustrations until shown to and approved by the user.
+## Product scope
+- Persian Android app for BLS and choking in adults, children and infants.
+- Advanced resuscitation is explicitly deferred.
+- Iran only; emergency number 115 opens through `ACTION_DIAL`; no direct-call permission.
+- Newborn resuscitation at birth is out of scope.
+- The user has explicitly approved the agreed Persian clinical content for review in the app. Medical illustrations were not added because the user asked to inspect/approve them separately.
 
-## Current code
-- Compose application shell, selection flow and review-only gate.
-- Pure Kotlin domain policies, age routing and session reducer.
-- Persian voice command allowlist/parser; commands are display-only.
-- Android one-shot speech recognition adapter and Persian TextToSpeech adapter used only for opt-in hardware tests.
-- Emergency dialer shortcut via ACTION_DIAL.
-- Unit tests for domain/routing/session/parser.
-- `.github/workflows/android.yml` uses Java 17, Gradle 8.13 and Android SDK 36; it runs unit tests, Android lint and debug APK assembly, then uploads reports and APK artifact.
-- AGP 8.11.1 paired with Kotlin 2.2.20 and Gradle 8.13 to respect published Kotlin/AGP compatibility limits.
+## Implemented in the local source
+- Compose navigation: home → module/age/rescuer selection → review → active pathway.
+- Data-driven pathway content for every module × age × rescuer combination.
+- Optional spoken age selection for explicit category words and numeric ages; ages 1–17 are not automatically classified from age alone because puberty signs determine adult vs pediatric routing; explicit category wording or manual selection is required.
+- Step-by-step controls, previous/next, repeat audio, manual/voice ROSC report, restart CPR route, choking-unconscious transition to BLS, and emergency dialer shortcut.
+- 48 bundled Persian MP3 files: 47 unique pathway instruction phrases plus opening greeting; no device Persian TTS or network required for playback.
+- Optional one-shot voice commands: confirm/yes, repeat, back, and user-reported return of normal breathing (ROSC). Touch navigation remains available and no time-critical action is blocked by voice confirmation.
+- Adjustable 100–120/min CPR metronome (default 110/min), independent from speech audio.
+- Branded medical color palette and custom heart/ECG adaptive launcher icon.
+- Tests added for pathway coverage, rescue-breath ratios, ROSC routing and selected 2025 safety rules.
 
-## Verification truth
-- Source structure and Android manifest have been inspected. The pure Kotlin domain/parser sources compiled with `kotlinc`; 17 smoke assertions passed. Workflow YAML parsed successfully.
-- Android SDK/Gradle are not available in the authoring container; Android/Compose build, Android lint, APK generation, emulator and device tests have not run here. GitHub Actions must provide the first real Android build result.
-- Persian speech recognition and TTS need a real handset check.
+## Clinical source checks
+- AHA 2025 adult BLS and FBAO guidance.
+- AHA/AAP 2025 pediatric BLS and infant/child FBAO guidance.
+- Infant CPR compression method: two-thumb encircling hands or heel of one hand; no two-finger infant CPR method.
+- Infant severe choking: five back blows alternating with five chest thrusts using heel of one hand; no abdominal thrusts.
+- Adult/child severe choking: five back blows alternating with five abdominal thrusts; late pregnancy or inability to encircle abdomen uses chest thrusts.
 
-## Phone-only upload workflow
-Download ZIP, extract it on Android, then upload the **contents** of the inner `RescueGuide` folder to the repository root. Keep `.github/workflows/android.yml` at the exact path. GitHub does not unpack an uploaded ZIP automatically. See `docs/UPLOAD_TO_GITHUB_FA.md`.
+## Local verification
+- `kotlinc` compilation of domain and clinical catalog succeeds.
+- A local smoke test exercises navigation, all 12 module/age/rescuer combinations, infant compression and infant choking safety rules.
+- Android XML resources parse successfully.
+- MP3 inventory is checked against SHA-256 names derived from every clinical instruction.
+- Full Android/Compose Gradle build, JUnit execution, lint, APK assembly, and physical-device testing have not yet been run in this authoring environment (Android SDK/Gradle are unavailable here).
+- eSpeak Persian voice is synthetic/robotic; audio intelligibility and pronunciation must be reviewed on an actual handset before release.
 
-## Not implemented yet
-- Adult/child/infant BLS algorithms and adult/child/infant choking pathways.
-- Medical approval record, clinical voice prompts, and algorithm execution.
-- Approved illustration assets, recorded Persian audio, final metronome, and clinical voice-control orchestration.
-
-Do not describe this source bundle as a finished clinical app or claim a verified APK until the workflow passes and the specialist approval/device-validation gates are complete.
+## Build workflow
+The existing `.github/workflows/android.yml` remains unchanged. Once local source is finished, use the existing GitHub Actions workflow for the first full Android build and tests. Do not claim a verified APK until that run succeeds and the APK is installed/tested on a real phone.

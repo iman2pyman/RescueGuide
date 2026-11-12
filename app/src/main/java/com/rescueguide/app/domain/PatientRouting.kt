@@ -22,7 +22,10 @@ object PatientRouting {
 data class SessionSelection(
     val module: AppModule,
     val patientGroup: PatientGroup? = null,
-    val rescuerType: RescuerType? = null
+    val rescuerType: RescuerType? = null,
+    val canProvideRescueBreaths: Boolean? = null,
+    val trainedRescuerCount: Int = 1
 ) {
-    val isComplete: Boolean get() = patientGroup != null && rescuerType != null
+    val isComplete: Boolean get() = patientGroup != null && rescuerType != null &&
+        canProvideRescueBreaths != null && trainedRescuerCount in 1..2
 }

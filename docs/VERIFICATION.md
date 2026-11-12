@@ -1,21 +1,20 @@
-# Source snapshot verification — 0.29.0-dev
+# وضعیت بررسی سورس — 0.30.0-dev
 
-This document distinguishes checks performed in the authoring environment from checks that still require GitHub Actions or a real Android phone.
+این سند میان بررسی‌هایی که واقعاً در محیط توسعه انجام شده و آزمون‌هایی که هنوز به Android SDK/Gradle یا گوشی نیاز دارند، تفکیک می‌کند.
 
-## Passed locally
+## بررسی‌های موفق محلی
+- کامپایل Kotlin برای لایه دامنه، کاتالوگ مسیرهای پزشکی و parser فرمان/سن با `kotlinc`.
+- اجرای smoke test برای ناوبری، ۱۲ ترکیب مسیر (دو ماژول × سه گروه سنی × دو نوع امدادگر)، تکنیک CPR شیرخوار، خفگی شیرخوار، جایگزین بارداری و فرمان/انتخاب سن گفتاری.
+- ۳۳ متد آزمون Kotlin با runner محلی سازگار با الگوی JUnit اجرا و موفق شدند؛ این اجرا جایگزین Gradle JUnit task نیست.
+- تجزیه همه فایل‌های XML اندروید با XML parser.
+- تطبیق SHA-256 تمام ۴۸ رکورد متن صوتی با نام ۴۸ فایل MP3 یکتا و بررسی decode/metadata همه فایل‌ها با FFprobe.
+- اجرای موفق اسکریپت تولید صوت فارسی با eSpeak و FFmpeg.
 
-- Kotlin domain and voice-parser production files compiled with `kotlinc`.
-- 17 source-level smoke assertions passed, covering emergency number validation, age routing, specialist approval gate, exact voice command parsing, and navigation state transitions.
-- Android manifest parsed as XML.
-- Manifest assertions confirmed microphone permission is present and `CALL_PHONE` / `INTERNET` permissions are absent.
-- GitHub Actions workflow parsed as YAML and its required trigger/SDK setup paths were inspected.
-- The source archive was inspected after creation to confirm it includes the Android source, tests, Gradle configuration, docs, and hidden `.github/workflows/android.yml` path.
+## هنوز اجرا نشده / ادعا نمی‌شود
+- کامپایل کامل Android/Compose از طریق Gradle.
+- اجرای JUnit، Android Lint، assembleDebug، شبیه‌ساز و تست نصب روی گوشی واقعی.
+- ارزیابی شنیداری تلفظ و وضوح صدای مصنوعی فارسی روی دستگاه واقعی.
+- بررسی عملی مجوز میکروفون و تشخیص گفتار روی گوشی کاربر.
+- تأیید بالینی مستقل توسط مرجع/نهاد پزشکی؛ کاربر متخصص محتوای مورد توافق را برای نسخه مورد بررسی تأیید کرده، اما این امر جایگزین کنترل کیفیت نهایی یا تأیید رسمی AHA نیست.
 
-## Not run / not claimed
-
-- Android Gradle Plugin / Compose compilation.
-- Gradle JUnit test task, Android lint, APK assembly, emulator tests, or physical-device tests.
-- Runtime microphone, speech recognition, Persian TTS or installation behavior on the user's handset.
-- Clinical validation or specialist approval of BLS / choking algorithms.
-
-The first real Android build result must come from the included GitHub Actions workflow. A successful debug APK build would still not mean the medical content is ready: clinical guidance remains unimplemented and disabled in this prototype.
+اولین نتیجه واقعی ساخت اندروید باید از GitHub Actions به دست آید. حتی APK debug موفق نیز به‌تنهایی به معنی آمادگی برای استفاده بالینی یا انتشار عمومی نیست.

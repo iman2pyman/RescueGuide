@@ -7,7 +7,9 @@
     </queries>
     <application
         android:allowBackup="false"
-        android:label="راهنمای احیا"
+        android:label="RescueGuide | راهنمای احیا"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.RescueGuide">
         <activity

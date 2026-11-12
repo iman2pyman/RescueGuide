@@ -33,6 +33,8 @@ class PatientRoutingTest {
     @Test fun selectionNeedsBothFields() {
         val incomplete = SessionSelection(AppModule.BASIC_LIFE_SUPPORT, PatientGroup.ADULT)
         assertFalse(incomplete.isComplete)
-        assertTrue(incomplete.copy(rescuerType = RescuerType.LAY_RESCUER).isComplete)
+        assertFalse(incomplete.copy(rescuerType = RescuerType.LAY_RESCUER).isComplete)
+        assertTrue(incomplete.copy(rescuerType = RescuerType.LAY_RESCUER, canProvideRescueBreaths = true).isComplete)
+        assertTrue(incomplete.copy(rescuerType = RescuerType.LAY_RESCUER, canProvideRescueBreaths = false).isComplete)
     }
 }
