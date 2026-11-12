@@ -21,6 +21,12 @@ class VoiceCommandParserTest {
         assertEquals(VoiceIntent.BACK, PersianVoiceCommandParser.parse("بازگشت"))
     }
 
+    @Test fun verifiesPersianScriptBeforeEnablingPersianVoiceMode() {
+        assertEquals(true, PersianVoiceCommandParser.containsPersianScript("بله"))
+        assertEquals(false, PersianVoiceCommandParser.containsPersianScript("yes"))
+        assertEquals(false, PersianVoiceCommandParser.containsPersianScript(""))
+    }
+
     @Test fun ambiguousOrLongSentencesDoNotAccidentallyConfirm() {
         assertEquals(VoiceIntent.UNKNOWN, PersianVoiceCommandParser.parse("شاید بله"))
         assertEquals(VoiceIntent.UNKNOWN, PersianVoiceCommandParser.parse(""))
