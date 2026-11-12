@@ -20,20 +20,21 @@ object PersianVoiceCommandParser {
         }
     }
 
-
     /** Explicit age words are accepted; ages around puberty are not guessed. */
     fun parsePatientGroup(raw: String): PatientGroup? {
         val value = normalize(raw)
         if (value.contains("شیرخوار") || value.contains("زیر یک سال") || value.contains("کمتر از یک سال")) return PatientGroup.INFANT
         if (value.contains("بزرگسال") || value == "بالغ" || value.contains("نشانه بلوغ")) return PatientGroup.ADULT
         if (value.contains("کودک") || value.contains("بچه") || value.contains("قبل از بلوغ")) return PatientGroup.CHILD
-        val digits = value.map { ch -> when (ch) {
-            '۰' -> '0'; '۱' -> '1'; '۲' -> '2'; '۳' -> '3'; '۴' -> '4'
-            '۵' -> '5'; '۶' -> '6'; '۷' -> '7'; '۸' -> '8'; '۹' -> '9'; else -> ch
-        } }.joinToString("")
-        val months = Regex("(\\d+)\\s*(ماه|ماهگی)").find(digits)?.groupValues?.get(1)?.toIntOrNull()
+        val digits = value.map { ch ->
+            when (ch) {
+                '۰' -> '0'; '۱' -> '1'; '۲' -> '2'; '۳' -> '3'; '۴' -> '4'
+                '۵' -> '5'; '۶' -> '6'; '۷' -> '7'; '۸' -> '8'; '۹' -> '9'; else -> ch
+            }
+        }.joinToString("")
+        val months = Regex("""(\d+)\s*(ماه|ماهگی)""").find(digits)?.groupValues?.get(1)?.toIntOrNull()
         if (months != null) return if (months < 12) PatientGroup.INFANT else PatientGroup.CHILD
-        val years = Regex("(\\d+)\\s*(سال|ساله|سالگی)").find(digits)?.groupValues?.get(1)?.toIntOrNull()
+        val years = Regex("""(\d+)\s*(سال|ساله|سالگی)""").find(digits)?.groupValues?.get(1)?.toIntOrNull()
         return when {
             years == null || years < 1 -> null
             years >= 18 -> PatientGroup.ADULT
@@ -46,8 +47,8 @@ object PersianVoiceCommandParser {
         .replace('ي', 'ی')
         .replace('ك', 'ک')
         .replace('\u200c', ' ')
-        .replace(Regex("[\\p{Punct}،؛؟!؟\\u0640]"), " ")
-        .replace(Regex("\\s+"), " ")
+        .filterNot { ch -> ch in ".,;:!?،؛؟!()[]{}<>\"'،ـ" }
+        .replace(Regex("""\s+"""), " ")
         .trim()
 
     private val confirmPhrases = setOf("بله", "آره", "اره", "تأیید", "تایید", "اوکی", "ok", "okay")
