@@ -44,7 +44,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.core.content.ContextCompat
-import com.rescueguide.app.platform.AndroidPersianSpeechOutput
 import com.rescueguide.app.platform.AndroidSpeechInput
 import com.rescueguide.app.voice.PersianVoiceCommandParser
 import com.rescueguide.app.voice.VoiceIntent
@@ -229,18 +228,15 @@ private fun VoiceHardwarePanel() {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val speechInput = remember(context) { AndroidSpeechInput(context) }
-    val speechOutput = remember(context) { AndroidPersianSpeechOutput(context) }
     var micState by remember { mutableStateOf(AndroidSpeechInput.State.IDLE) }
-    var ttsState by remember { mutableStateOf(AndroidPersianSpeechOutput.State.INITIALIZING) }
     var recognized by remember { mutableStateOf("هنوز فرمانی دریافت نشده است") }
     var parsed by remember { mutableStateOf(VoiceIntent.UNKNOWN) }
+    var persianVoiceVerified by remember { mutableStateOf(false) }
 
-    DisposableEffect(speechInput, speechOutput, lifecycleOwner) {
-        speechOutput.observeReady { ttsState = it }
+    DisposableEffect(speechInput, lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_STOP) {
                 speechInput.stop()
-                speechOutput.stop()
                 micState = AndroidSpeechInput.State.IDLE
             }
         }
@@ -248,7 +244,6 @@ private fun VoiceHardwarePanel() {
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
             speechInput.stop()
-            speechOutput.shutdown()
         }
     }
 
@@ -257,31 +252,53 @@ private fun VoiceHardwarePanel() {
             onResult = { phrase ->
                 recognized = phrase
                 parsed = PersianVoiceCommandParser.parse(phrase)
+                // Do not enable voice mode merely because a recognizer exists.
+                // Require a successful Persian-script control phrase ("بله", "خیر", etc.).
+                persianVoiceVerified =
+                    PersianVoiceCommandParser.containsPersianScript(phrase) &&
+                    parsed != VoiceIntent.UNKNOWN
             },
-            onState = { micState = it }
+            onState = {
+                micState = it
+                if (it == AndroidSpeechInput.State.UNAVAILABLE ||
+                    it == AndroidSpeechInput.State.NO_MATCH ||
+                    it == AndroidSpeechInput.State.ERROR
+                ) persianVoiceVerified = false
+            }
         )
     }
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) startListening() else micState = AndroidSpeechInput.State.ERROR
+        if (granted) startListening() else {
+            micState = AndroidSpeechInput.State.ERROR
+            persianVoiceVerified = false
+        }
     }
     val hasPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
 
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text("آزمایش زیرساخت صوتی", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            Text("میکروفون فقط پس از فشردن دکمه و اجازه شما فعال می‌شود. نتیجه گفتار فقط برای آزمایش فرمان‌ها نمایش داده می‌شود و هیچ اقدام پزشکی انجام نمی‌دهد.")
+            Text("روش کنترل برنامه", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text(
+                if (persianVoiceVerified) "تشخیص یک فرمان فارسی با موفقیت آزمایش شد. فرمان صوتی در دسترس است؛ دکمه‌های لمسی همچنان فعال می‌مانند."
+                else "حالت کنترل لمسی فعال است. برای فعال‌سازی اختیاری فرمان صوتی، ابتدا پشتیبانی واقعی فارسی را آزمایش کنید."
+            )
             Text("وضعیت تشخیص گفتار: ${when (micState) {
-                AndroidSpeechInput.State.IDLE -> "آماده"
+                AndroidSpeechInput.State.IDLE -> "آماده آزمایش"
                 AndroidSpeechInput.State.LISTENING -> "در حال شنیدن"
                 AndroidSpeechInput.State.PROCESSING -> "در حال پردازش"
-                AndroidSpeechInput.State.UNAVAILABLE -> "سرویس تشخیص گفتار در دستگاه موجود نیست"
-                AndroidSpeechInput.State.NO_MATCH -> "گفتار واضحی تشخیص داده نشد؛ دوباره تلاش کنید"
-                AndroidSpeechInput.State.ERROR -> "خطا یا مجوز رد شده است"
+                AndroidSpeechInput.State.UNAVAILABLE -> "سرویس تشخیص گفتار موجود نیست؛ از دکمه‌های لمسی استفاده کنید"
+                AndroidSpeechInput.State.NO_MATCH -> "فرمان فارسی تشخیص داده نشد؛ کنترل لمسی فعال است"
+                AndroidSpeechInput.State.ERROR -> "خطا یا مجوز رد شده؛ کنترل لمسی فعال است"
             }}")
             Button(onClick = {
                 if (hasPermission) startListening() else permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-            }, modifier = Modifier.fillMaxWidth().height(52.dp)) { Text("شروع آزمایش فرمان صوتی") }
-            OutlinedButton(onClick = { speechInput.stop(); micState = AndroidSpeechInput.State.IDLE }, modifier = Modifier.fillMaxWidth()) { Text("توقف میکروفون") }
+            }, modifier = Modifier.fillMaxWidth().height(52.dp)) {
+                Text("آزمایش فرمان فارسی (بگویید: بله)")
+            }
+            OutlinedButton(
+                onClick = { speechInput.stop(); micState = AndroidSpeechInput.State.IDLE; persianVoiceVerified = false },
+                modifier = Modifier.fillMaxWidth()
+            ) { Text("توقف میکروفون و استفاده از کنترل لمسی") }
             Text("گفتار تشخیص‌داده‌شده: $recognized")
             Text("برداشت آزمایشی: ${when (parsed) {
                 VoiceIntent.CONFIRM -> "تأیید"
@@ -290,28 +307,20 @@ private fun VoiceHardwarePanel() {
                 VoiceIntent.BACK -> "بازگشت"
                 VoiceIntent.UNKNOWN -> "نامشخص / بدون اقدام"
             }}")
-            Text("وضعیت صدای فارسی: ${when (ttsState) {
-                AndroidPersianSpeechOutput.State.INITIALIZING -> "در حال آماده‌سازی"
-                AndroidPersianSpeechOutput.State.READY -> "آماده"
-                AndroidPersianSpeechOutput.State.LANGUAGE_DATA_MISSING -> "داده صدای فارسی نصب نیست"
-                AndroidPersianSpeechOutput.State.LANGUAGE_UNSUPPORTED -> "صدای فارسی پشتیبانی نمی‌شود"
-                AndroidPersianSpeechOutput.State.INIT_FAILED -> "راه‌اندازی موتور گفتار ناموفق بود"
-            }}")
-            Button(
-                onClick = { speechOutput.speakTestPhrase("این فقط آزمایش صدای فارسی برنامه راهنمای احیا است.") },
-                enabled = ttsState == AndroidPersianSpeechOutput.State.READY,
-                modifier = Modifier.fillMaxWidth().height(52.dp)
-            ) { Text("پخش آزمایشی صدای فارسی") }
-            OutlinedButton(
-                onClick = { speechOutput.repeatLastTestPhrase() },
-                enabled = ttsState == AndroidPersianSpeechOutput.State.READY,
-                modifier = Modifier.fillMaxWidth()
-            ) { Text("تکرار آخرین صدای آزمایشی") }
-            OutlinedButton(
-                onClick = { speechOutput.stop() },
-                modifier = Modifier.fillMaxWidth()
-            ) { Text("توقف پخش صدا") }
-            Text("توجه: تشخیص گفتار ممکن است به سرویس نصب‌شده روی گوشی و اتصال شبکه وابسته باشد. هیچ صدای ضبط‌شده‌ای در برنامه ذخیره نمی‌شود.", style = MaterialTheme.typography.bodySmall)
+            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
+                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text("راهنمای فعال‌سازی", fontWeight = FontWeight.Bold)
+                    Text("اگر فرمان فارسی تشخیص داده نشد، در تنظیمات سرویس تشخیص گفتار گوشی زبان فارسی (fa-IR) را در صورت وجود اضافه یا دانلود کنید و دوباره آزمایش کنید. اگر فارسی در فهرست نبود یا آزمایش ناموفق بود، نیازی به تغییر گوشی نیست؛ از دکمه‌های لمسی استفاده کنید.")
+                }
+            }
+            Text(
+                "پخش راهنمای فارسی در نسخه نهایی از فایل‌های صوتی داخل برنامه انجام می‌شود و به صدای TTS گوشی وابسته نخواهد بود. فایل‌های صوتی هنوز در حال آماده‌سازی و بازبینی‌اند.",
+                style = MaterialTheme.typography.bodySmall
+            )
+            Text(
+                "میکروفون فقط پس از فشردن دکمه و اجازه شما فعال می‌شود. تشخیص گفتار ممکن است به سرویس نصب‌شده یا اینترنت وابسته باشد. فرمان صوتی هرگز نباید باعث تأخیر در اقدام حیاتی شود.",
+                style = MaterialTheme.typography.bodySmall
+            )
         }
     }
 }
