@@ -12,7 +12,8 @@ Persian Android prototype for voice-assisted basic life support (BLS) and chokin
 - BLS and choking module selection, adult/child/infant manual routing, and rescuer-type selection.
 - Review gate; clinical guidance remains disabled.
 - Strict Persian voice-command phrase parser for confirm, decline, repeat and back; parsed commands are not connected to clinical actions.
-- Opt-in Android speech-recognition hardware test; microphone access is requested only after the user starts it. Persian recognition is optional and handset/service-dependent; touch controls remain the fallback.
+- Opt-in Android speech-recognition test: voice mode is considered verified only after a valid Persian-script control phrase is recognized; otherwise the UI stays in touch-first fallback. Microphone access is requested only after the user starts the test.
+- Touch controls remain available even after voice verification. Recognition may depend on handset speech service and network.
 - Offline Persian audio playback foundation (`OfflinePersianAudioGuide`) that reads bundled recordings from `app/src/main/assets/audio/fa/`; the final MP3 recordings are not included yet and clinical prompts remain disabled.
 - Iran emergency dialer shortcut using `ACTION_DIAL` for 115.
 - Unit tests for domain policies, patient routing, navigation and voice parsing.
@@ -28,7 +29,7 @@ The GitHub workflow is located at `.github/workflows/android.yml`. The extracted
 - Clinical content must be checked against AHA/AAP 2025 and approved explicitly by the user's specialist before activation or publication.
 - Advanced life support is outside this version's scope.
 - Offline audio playback is designed not to depend on handset TTS. Final Persian recordings still need to be produced, reviewed and approved before being bundled.
-- Persian speech recognition is optional, varies by handset/service and may require a Persian language pack and network access. If unsupported, use on-screen touch controls; voice must never block time-critical actions.
+- Persian speech recognition is optional, varies by handset/service and may require a Persian language pack and network access. The app requires a successful Persian control-phrase test before marking voice recognition verified; otherwise it remains touch-first. Touch controls are always available and voice must never block time-critical actions.
 - GitHub Actions run `43295798640` completed Gradle validation, unit tests, Android lint and debug APK assembly successfully. This is a CI build, not a physical-device test or clinical approval.
 - The app is not a medical device and does not replace emergency dispatch or hands-on training.
 
@@ -36,4 +37,4 @@ The GitHub workflow is located at `.github/workflows/android.yml`. The extracted
 
 The ZIP import workflow rebases its extracted-source commit onto the latest `main` branch before pushing, and leaves workflow definitions under separate maintenance.
 
-See `docs/PERSIAN_VOICE_AND_OFFLINE_AUDIO_FA.md` for the Persian recognition fallback and offline audio asset plan.
+The app includes a Persian recognition verification test and a touch-first fallback; see `docs/PERSIAN_VOICE_AND_OFFLINE_AUDIO_FA.md` for the Persian recognition fallback and offline audio asset plan.
