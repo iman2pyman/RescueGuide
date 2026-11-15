@@ -100,7 +100,7 @@ import com.rescueguide.app.domain.SessionFlowReducer
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent { RescueGuideRoot() }
+        setContent { RescueGuideRootV2() }
     }
 }
 
