@@ -11,7 +11,7 @@ class OfflinePersianAudioPlayer(context: Context) {
     private val appContext = context.applicationContext
     private var player: MediaPlayer? = null
 
-    fun play(text: String): Boolean {
+    fun play(text: String, onCompletion: (() -> Unit)? = null): Boolean {
         stop()
         if (text.isBlank()) return false
         val assetName = sha256(text) + ".mp3"
@@ -29,6 +29,7 @@ class OfflinePersianAudioPlayer(context: Context) {
             next.setOnCompletionListener { media ->
                 media.release()
                 if (player === media) player = null
+                onCompletion?.invoke()
             }
             next.setOnErrorListener { media, _, _ ->
                 media.release()
