@@ -40,8 +40,34 @@ jobs:
         with:
           gradle-version: '8.13'
 
-      - name: Fetch license-cleared offline image assets
-        run: bash tools/fetch_licensed_images.sh
+      - name: Verify bundled offline image assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          assets=(
+            guide_abdominal_thrusts.jpg
+            guide_adult_airway.png
+            guide_adult_breathing.jpg
+            guide_adult_compressions.png
+            guide_aed_pad_position.png
+            guide_checking_respiration.jpg
+            guide_child_breathing.png
+            guide_child_compressions.png
+            guide_choking_back_blows.jpg
+            guide_infant_airway.png
+            guide_infant_breathing.png
+            guide_infant_breathing_check.png
+            guide_infant_compressions.jpg
+            guide_infant_compressions_onehand.jpg
+            guide_recovery_position.jpg
+          )
+          for asset in "${assets[@]}"; do
+            test -s "app/src/main/res/drawable-nodpi/$asset" || {
+              echo "Missing bundled image asset: $asset" >&2
+              exit 1
+            }
+          done
+          echo "All ${#assets[@]} offline image assets are present."
 
       - name: Validate Gradle project
         run: gradle --no-daemon --stacktrace tasks --all
@@ -58,9 +84,10 @@ jobs:
       - name: Package complete source
         if: success()
         run: |
-          zip -qr RescueGuide-0.34.0-dev-FULL-SOURCE.zip . \
+          zip -qr RescueGuide-0.36.0-dev-FULL-SOURCE.zip . \
             -x ".git/*" ".gradle/*" ".kotlin/*" "*/build/*" "build/*" \
                "RescueGuide-0.33.0-dev-FINAL-SOURCE.zip" \
+               "RescueGuide-0.36.0-dev-FULL-SOURCE.zip" \
                "SOURCE_FILES_SHA256.txt"
 
       - name: Upload complete source
@@ -68,7 +95,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: rescueguide-full-source
-          path: RescueGuide-0.34.0-dev-FULL-SOURCE.zip
+          path: RescueGuide-0.36.0-dev-FULL-SOURCE.zip
           if-no-files-found: error
           retention-days: 30
 
