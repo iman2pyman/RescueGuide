@@ -9,8 +9,8 @@ The following original images are bundled as visual aids. Their source pages sta
 | guide_adult_breathing.jpg | Rama | CC BY-SA 3.0 France / CC BY-SA 2.0 France | https://commons.wikimedia.org/wiki/File:Insulfation.jpg |
 | guide_child_breathing.png | BruceBlaus | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:CPR_Child_Blow_In_Air.png |
 | guide_child_compressions.png | BruceBlaus | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:CPR_Child_Chest_Compression.png |
-| guide_infant_compressions.jpg | Children’s Health Queensland, Figure 6, ANZCOR Guideline 12.1 (p. 12) | CC BY-NC 4.0 | https://www.anzcor.org/assets/generated-anzcor-guideline-pdfs/guideline-12-1-paediatric-basic-life-support-254.pdf |
-| guide_infant_compressions_onehand.jpg | Children’s Health Queensland, Figure 7, ANZCOR Guideline 12.1 (p. 13) | CC BY-NC 4.0 | https://www.anzcor.org/assets/generated-anzcor-guideline-pdfs/guideline-12-1-paediatric-basic-life-support-254.pdf |
+| guide_infant_compressions.jpg | Children’s Health Queensland, Figure 6, ANZCOR Guideline 12.1 (p. 12) | CC BY-NC 4.0 | https://www.anzcor.org/assets/generated-anzcor-guideline-pdfs/guideline-12-1-paediatric-basic-life-support-pbls-for-health-professionals-254.pdf |
+| guide_infant_compressions_onehand.jpg | Children’s Health Queensland, Figure 7, ANZCOR Guideline 12.1 (p. 13) | CC BY-NC 4.0 | https://www.anzcor.org/assets/generated-anzcor-guideline-pdfs/guideline-12-1-paediatric-basic-life-support-pbls-for-health-professionals-254.pdf |
 | guide_infant_airway.png | BruceBlaus | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:CPR_Infant_Closed_vs_Open_Airway.png |
 | guide_infant_breathing.png | BruceBlaus | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:CPR_Infant_Mouth_To_Nose.png |
 | guide_infant_breathing_check.png | BruceBlaus | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:CPR_Infant_Look_Listen_%26_Feel.png |
