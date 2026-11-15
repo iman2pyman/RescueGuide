@@ -1,27 +1,37 @@
-# RescueGuide handoff — 0.34.0-dev
+# RescueGuide handoff — 0.36.0-dev
 
-## دامنه محصول
-- اپلیکیشن اندرویدی فارسی برای راهنمای احیای پایه (BLS) در بزرگسال، کودک و شیرخوار.
-- احیای پیشرفته و احیای نوزاد هنگام تولد خارج از محدوده این نسخه‌اند.
-- کشور برنامه ایران و شماره اورژانس ۱۱۵ است؛ تماس از طریق ACTION_DIAL باز می‌شود و بدون اقدام کاربر تماس مستقیم برقرار نمی‌شود.
-- ماژول خفگی در نسخه 0.34.0 فعال نیست.
+## Product scope
+- Persian Android app for basic life support (BLS) in adults, children and infants.
+- Advanced resuscitation is deferred to a later version.
+- Current release excludes choking management.
+- Iran only; emergency number 115 opens through ACTION_DIAL; no direct-call permission.
+- Newborn resuscitation at birth is out of scope.
 
-## امکانات پیاده‌سازی‌شده
-- صفحه آغازین با انتخاب مستقل بزرگسال، کودک و شیرخوار.
-- صفحه دوم با دو گزینه امدادگر آموزش‌دیده و فرد عادی.
-- پخش خودکار دستورهای صوتی MP3 فارسی و پیشروی خودکار پس از پایان هر دستور؛ تأیید گفتاری «بله» برای ادامه لازم نیست.
-- دکمه‌های مرحله قبل و تکرار توضیح فعلی.
-- دکمه گزارش بازگشت علائم حیاتی و صفحه مستقل شش‌مرحله‌ای مراقبت پس از ROSC بدون صوت.
-- تنظیمات تم شب/روز ذخیره‌شونده، راهنمای برنامه و معرفی سازنده.
-- تصاویر آموزشی آفلاین و بزرگ‌نمایی‌پذیر، با فهرست انتساب و مجوز در docs/IMAGE_ASSET_LICENSES.md.
-- ۳۴ فایل MP3 ارسالی کاربر، آیکن اختصاصی و مترونوم CPR حفظ شده‌اند.
+## Implemented
+- Compose home screen styled to match the user-approved RescueGuide reference image.
+- Navigation: home → age/rescuer/breathing selection → review → active pathway.
+- Separate adult, child and infant BLS pathways.
+- Voice/manual age selection, lay/trained rescuer selection, trained rescuer count, and rescue-breath choice.
+- Step repeat/back controls, optional voice commands, ROSC report and CPR restart route.
+- Adjustable CPR metronome and Iran 115 dialer.
+- 34 user-provided Persian MP3 files bundled and matched to exact text SHA-256 identifiers.
+- No choking audio or choking pathway is included in this release.
 
-## راستی‌آزمایی
-- GitHub Actions run #54 (43755835177) برای کد برنامه موفق شد: Gradle validation، unit tests، lint و assembleDebug.
-- هر ۳۴ فایل صوتی داخل APK از نظر نام و محتوای باینری با ۳۴ فایل سورس مرجع تطبیق داده شدند.
-- APK خروجی debug است؛ نصب و اجرای آن روی گوشی واقعی هنوز تأیید نشده است.
-- ساخت موفق به معنی تأیید پزشکی نیست؛ محتوای بالینی باید پیش از انتشار عمومی توسط متخصص مسئول بررسی و تأیید شود.
+## Verification limits
+- Audio filename-prefix mapping to full SHA-256 IDs is unique for all 34 supplied files.
+- MP3 decode/metadata verification is performed with ffprobe and `tools/verify_audio_assets.py`.
+- Full Android Gradle build, APK assembly, instrumentation tests, and physical-device verification must still be run in Android Studio or GitHub Actions.
+- Medical content and instructional illustrations require final specialist review before publication.
 
-## محدودیت مجوز
-- دو تصویر فشار شیرخوار مجوز CC BY-NC 4.0 دارند و فقط برای استفاده غیرتجاری مجازند؛ برای استفاده تجاری باید مجوز جداگانه تهیه یا تصاویر جایگزین شوند.
-- سایر انتساب‌ها و پیوند مجوزها در docs/IMAGE_ASSET_LICENSES.md ثبت شده‌اند.
+
+## 0.35.0-dev work in progress
+The 0.35.0-dev source draft includes the approved dark navy / cyan / blue-violet theme direction, home shortcuts across non-home pages, expanded BLS study guide, pediatric rescuer-count routing, and an automatic CPR counter. Compression counter targets 30 for adults and single-rescuer pediatric CPR, and 15 for two-trained-rescuer pediatric CPR. The audible ventilation signals are prompts only; they do not represent delivered breaths or verify chest rise. Existing MP3 voice files were not modified. Run Android CI and device tests before distributing an APK.
+
+
+## 0.36.0-dev implementation notes
+- Approved navy / cyan / blue-violet theme is retained across the home, rescuer selection, active CPR, study guide, and post-ROSC screens.
+- CPR cadence counter runs at approximately 110/min (within 100–120/min), with 30 compressions for adults and single-rescuer pediatric CPR, and 15 for two-trained-rescuer pediatric CPR.
+- When rescue breaths are enabled, two soft airflow-style sound cues mark the two breath windows. These are timing prompts only; they do not deliver ventilation or confirm chest rise.
+- Existing 34 Persian MP3 files remain unchanged.
+- AED explanatory text now explicitly introduces the attenuator-pad instruction with the requested phrase.
+- Android build and physical-device verification are still required.

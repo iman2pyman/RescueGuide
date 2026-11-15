@@ -2,6 +2,8 @@ package com.rescueguide.app
 
 import android.content.Intent
 import android.net.Uri
+import android.media.AudioManager
+import android.media.ToneGenerator
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,6 +19,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.MonitorHeart
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -38,9 +41,12 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.rescueguide.app.clinical.ClinicalPathwaysFa
 import com.rescueguide.app.domain.*
 import com.rescueguide.app.platform.OfflinePersianAudioPlayer
+import com.rescueguide.app.platform.VentilationCuePlayer
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
+private fun SessionStateHome() = SessionFlowState()
 
 @Composable
 fun RescueGuideRootV2() {
@@ -52,22 +58,23 @@ fun RescueGuideRootV2() {
     var post by remember { mutableStateOf(false) }
     var settings by remember { mutableStateOf(false) }
     var about by remember { mutableStateOf(false) }
-    MaterialTheme(colorScheme = if (dark) darkColorScheme(primary = Color(0xFF4DA3FF), secondary = Color(0xFF36C8C8)) else lightColorScheme(primary = Color(0xFF0B4F71), secondary = Color(0xFF168AAD))) {
+    MaterialTheme(colorScheme = if (dark) darkColorScheme(primary = Color(0xFF42D6D0), secondary = Color(0xFF6C8CFF), tertiary = Color(0xFF9B7BFF), background = Color(0xFF061632), surface = Color(0xFF10264A)) else lightColorScheme(primary = Color(0xFF087F8C), secondary = Color(0xFF315FCB), tertiary = Color(0xFF7354C7), background = Color(0xFFF0F6FC), surface = Color.White)) {
         when {
-            guide -> LicensedGuideV2(dark) { guide = false }
+            guide -> LicensedGuideV2(dark, { guide = false }, { guide = false; flow = SessionFlowState() })
             post -> PostRoscV2(dark, { post = false }, {
                 post = false
                 val s = flow.selection!!
                 val p = ClinicalPathwaysFa.get(s.module, s.patientGroup!!, s.rescuerType!!, s.canProvideRescueBreaths, s.trainedRescuerCount)
                 flow = flow.copy(page = SessionPage.ACTIVE_PATH, activeStepIndex = p.steps.indexOfFirst { it.id == "compressions" }.coerceAtLeast(0))
-            })
+            }, { flow = SessionStateHome(); post = false })
             flow.page == SessionPage.HOME -> HomeV2(dark, { g ->
                 flow = SessionFlowReducer.reduce(SessionFlowState(), SessionFlowAction.ChooseModule(AppModule.BASIC_LIFE_SUPPORT))
                 flow = SessionFlowReducer.reduce(flow, SessionFlowAction.ChoosePatient(g))
             }, { guide = true }, { settings = true })
             flow.page == SessionPage.SELECTION || flow.page == SessionPage.REVIEW_GATE -> RescuerV2(flow.selection?.patientGroup ?: PatientGroup.ADULT, dark,
                 { flow = SessionFlowReducer.reduce(flow, SessionFlowAction.Back) },
-                { flow = SessionFlowReducer.reduce(flow, SessionFlowAction.ChooseRescuer(it)) })
+                { type, count -> flow = SessionFlowReducer.reduce(flow, SessionFlowAction.ChooseRescuer(type, count)) },
+                { flow = SessionStateHome() })
             else -> ActiveV2(flow.selection!!, flow.activeStepIndex, dark,
                 { flow = SessionFlowReducer.reduce(flow, SessionFlowAction.PreviousStep) },
                 {
@@ -76,7 +83,8 @@ fun RescueGuideRootV2() {
                     if (flow.activeStepIndex < p.steps.indexOfLast { it.id != "rosc" }) flow = SessionFlowReducer.reduce(flow, SessionFlowAction.NextStep)
                 },
                 { flow = SessionFlowReducer.reduce(flow, SessionFlowAction.Reset) },
-                { post = true })
+                { post = true },
+                { flow = SessionStateHome(); post = false })
         }
         if (settings) AlertDialog(onDismissRequest = { settings = false }, title = { Text("تنظیمات برنامه") }, text = {
             Column {
@@ -104,12 +112,18 @@ private fun HomeV2(dark: Boolean, choose: (PatientGroup) -> Unit, guide: () -> U
     DisposableEffect(audio) { onDispose { audio.release() } }
     LaunchedEffect(Unit) { audio.play("سلام، من رابط صوتی احیا هستم. آرامش خود را حفظ کنید. در شرایط اضطراری با ۱۱۵ تماس بگیرید.") }
     Column(Modifier.fillMaxSize().background(Brush.verticalGradient(bg)).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(13.dp)) {
-        Text("RescueGuide", color = fg, fontSize = 28.sp, fontWeight = FontWeight.Black)
-        Text("دستیار صوتی احیای اضطراری • ایران ۱۱۵", color = fg, fontWeight = FontWeight.Bold)
-        Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+        Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(28.dp), colors = CardDefaults.cardColors(containerColor = if (dark) Color(0xFF102D55) else Color(0xFF0B5678))) {
+            Column(Modifier.fillMaxWidth().background(Brush.horizontalGradient(listOf(Color(0xFF0B4775), Color(0xFF176B9B), Color(0xFF2856A8)))).padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon(Icons.Filled.MonitorHeart, null, tint = Color(0xFF5EF0E4), modifier = Modifier.size(48.dp))
+                Text("RescueGuide", color = Color.White, fontSize = 29.sp, fontWeight = FontWeight.Black)
+                Text("دستیار صوتی هوشمند احیای اضطراری", color = Color.White, fontWeight = FontWeight.Bold)
+                Text("ایران • اورژانس ۱۱۵", color = Color(0xFFB9F4F0), fontSize = 13.sp)
+            }
+        }
+        Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(22.dp), colors = CardDefaults.cardColors(containerColor = if (dark) Color(0xFF17365D) else Color.White)) {
             Column(Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("گروه سنی بیمار را انتخاب کنید", color = Color(0xFF0756C8), fontSize = 18.sp, fontWeight = FontWeight.Black)
-                Text("پس از انتخاب نوع امدادگر، راهنمای صوتی خودکار آغاز می‌شود.", color = Color(0xFF10264A), textAlign = TextAlign.Center)
+                Text("گروه سنی بیمار را انتخاب کنید", color = if (dark) Color(0xFF6DE7E0) else Color(0xFF0756C8), fontSize = 18.sp, fontWeight = FontWeight.Black)
+                Text("پس از انتخاب امدادگر، راهنمای صوتی و شمارشگر CPR فعال می‌شود.", color = fg, textAlign = TextAlign.Center)
             }
         }
         PatientTileV2("بزرگسال", "راهنمای احیای پایه بزرگسال", Color(0xFF167BFF)) { choose(PatientGroup.ADULT) }
@@ -128,7 +142,7 @@ private fun HomeV2(dark: Boolean, choose: (PatientGroup) -> Unit, guide: () -> U
 
 @Composable
 private fun PatientTileV2(title: String, subtitle: String, tint: Color, click: () -> Unit) {
-    Card(Modifier.fillMaxWidth().height(86.dp).clickable(onClick = click), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = tint)) {
+    Card(Modifier.fillMaxWidth().height(92.dp).clickable(onClick = click).border(1.dp, Color.White.copy(alpha = 0.35f), RoundedCornerShape(22.dp)), shape = RoundedCornerShape(22.dp), colors = CardDefaults.cardColors(containerColor = tint)) {
         Row(Modifier.fillMaxSize().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Filled.Favorite, null, tint = Color.White, modifier = Modifier.size(32.dp))
             Spacer(Modifier.width(12.dp))
@@ -139,15 +153,20 @@ private fun PatientTileV2(title: String, subtitle: String, tint: Color, click: (
 }
 
 @Composable
-private fun RescuerV2(group: PatientGroup, dark: Boolean, back: () -> Unit, choose: (RescuerType) -> Unit) {
+private fun RescuerV2(group: PatientGroup, dark: Boolean, back: () -> Unit, choose: (RescuerType, Int) -> Unit, home: () -> Unit) {
     val fg = if (dark) Color.White else Color(0xFF10264A)
     val bg = if (dark) listOf(Color(0xFF031943), Color(0xFF062B68)) else listOf(Color(0xFFEAF3FF), Color(0xFFF7FAFF))
     Column(Modifier.fillMaxSize().background(Brush.verticalGradient(bg)).padding(20.dp), verticalArrangement = Arrangement.spacedBy(18.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        OutlinedButton(onClick = back) { Text("بازگشت") }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            OutlinedButton(onClick = back) { Text("بازگشت") }
+            TextButton(onClick = home) { Icon(Icons.Filled.Home, null); Text("صفحه اول") }
+        }
         Text("نوع امدادگر را انتخاب کنید", color = fg, fontSize = 23.sp, fontWeight = FontWeight.Black)
         Text("گروه سنی: " + PatientRouting.label(group), color = fg)
-        RescuerTileV2("امدادگر آموزش‌دیده", Color(0xFF0877D5), Icons.Filled.MonitorHeart) { choose(RescuerType.TRAINED_RESCUER) }
-        RescuerTileV2("فرد عادی", Color(0xFF159B59), Icons.Filled.Favorite) { choose(RescuerType.LAY_RESCUER) }
+        Text("تعداد امدادگران آموزش‌دیده حاضر را مشخص کنید:", color = fg, fontWeight = FontWeight.Bold)
+        RescuerTileV2("یک امدادگر آموزش‌دیده", Color(0xFF0877D5), Icons.Filled.MonitorHeart) { choose(RescuerType.TRAINED_RESCUER, 1) }
+        if (group != PatientGroup.ADULT) RescuerTileV2("دو امدادگر آموزش‌دیده", Color(0xFF6656C8), Icons.Filled.MonitorHeart) { choose(RescuerType.TRAINED_RESCUER, 2) }
+        RescuerTileV2("فرد عادی / بدون آموزش تخصصی", Color(0xFF159B59), Icons.Filled.Favorite) { choose(RescuerType.LAY_RESCUER, 1) }
     }
 }
 
@@ -162,7 +181,7 @@ private fun RescuerTileV2(title: String, tint: Color, icon: androidx.compose.ui.
 }
 
 @Composable
-private fun ActiveV2(s: SessionSelection, stepIndex: Int, dark: Boolean, previous: () -> Unit, next: () -> Unit, exit: () -> Unit, rosc: () -> Unit) {
+private fun ActiveV2(s: SessionSelection, stepIndex: Int, dark: Boolean, previous: () -> Unit, next: () -> Unit, exit: () -> Unit, rosc: () -> Unit, home: () -> Unit) {
     val ctx = LocalContext.current
     val audio = remember(ctx) { OfflinePersianAudioPlayer(ctx) }
     val scope = rememberCoroutineScope()
@@ -170,6 +189,10 @@ private fun ActiveV2(s: SessionSelection, stepIndex: Int, dark: Boolean, previou
     val steps = remember(path) { path.steps.filterNot { it.id == "rosc" } }
     val index = stepIndex.coerceIn(0, steps.lastIndex)
     val step = steps[index]
+    val compressionTarget = if (s.patientGroup != PatientGroup.ADULT && s.rescuerType == RescuerType.TRAINED_RESCUER && s.trainedRescuerCount >= 2) 15 else 30
+    val hasBreaths = s.canProvideRescueBreaths != false
+    var compressionCount by remember(step.id, s.trainedRescuerCount) { mutableIntStateOf(0) }
+    var ventilationCue by remember(step.id) { mutableIntStateOf(0) }
     val fg = if (dark) Color.White else Color(0xFF10264A)
     val sub = if (dark) Color(0xFFD6E7FF) else Color(0xFF31577D)
     val lifecycle = LocalLifecycleOwner.current
@@ -179,11 +202,40 @@ private fun ActiveV2(s: SessionSelection, stepIndex: Int, dark: Boolean, previou
         autoAdvance?.cancel()
         val started = audio.play(step.instruction) {
             autoAdvance?.cancel()
-            autoAdvance = scope.launch { delay(2000); if (index < steps.lastIndex) next() }
+            if (step.id != "compressions") autoAdvance = scope.launch { delay(2000); if (index < steps.lastIndex) next() }
         }
-        if (!started) autoAdvance = scope.launch { delay(9000); if (index < steps.lastIndex) next() }
+        if (!started && step.id != "compressions") autoAdvance = scope.launch { delay(9000); if (index < steps.lastIndex) next() }
     }
     LaunchedEffect(step.id) { speakCurrentStep() }
+    LaunchedEffect(step.id, compressionTarget, hasBreaths) {
+        if (step.id == "compressions") {
+            val tone = runCatching { ToneGenerator(AudioManager.STREAM_MUSIC, 72) }.getOrNull()
+            val breathCue = VentilationCuePlayer()
+            try {
+                while (true) {
+                    compressionCount = 0
+                    ventilationCue = 0
+                    // 110/min midpoint of the AHA-recommended 100–120/min range.
+                    for (n in 1..compressionTarget) {
+                        compressionCount = n
+                        tone?.startTone(ToneGenerator.TONE_PROP_BEEP, 65)
+                        delay(545L)
+                    }
+                    if (hasBreaths) {
+                        ventilationCue = 1
+                        breathCue.playBreathCue()
+                        delay(1_000L)
+                        ventilationCue = 2
+                        breathCue.playBreathCue()
+                        delay(1_000L)
+                    }
+                }
+            } finally { breathCue.stop(); tone?.release() }
+        } else {
+            compressionCount = 0
+            ventilationCue = 0
+        }
+    }
     DisposableEffect(audio, lifecycle) {
         val observer = LifecycleEventObserver { _, e -> if (e == Lifecycle.Event.ON_STOP) audio.stop() }
         lifecycle.lifecycle.addObserver(observer)
@@ -191,8 +243,9 @@ private fun ActiveV2(s: SessionSelection, stepIndex: Int, dark: Boolean, previou
     }
     Column(Modifier.fillMaxSize().background(Brush.verticalGradient(if (dark) listOf(Color(0xFF031943), Color(0xFF062B68)) else listOf(Color(0xFFEAF3FF), Color(0xFFF7FAFF))))
         .verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Text("مرحله " + (index + 1) + " از " + steps.size, color = fg)
+            TextButton(onClick = { autoAdvance?.cancel(); audio.stop(); exit(); home() }) { Icon(Icons.Filled.Home, null); Text("صفحه اول") }
         }
         Text("راهنمای احیای پایه", color = fg, fontSize = 22.sp, fontWeight = FontWeight.Black)
         Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White)) {
@@ -204,6 +257,19 @@ private fun ActiveV2(s: SessionSelection, stepIndex: Int, dark: Boolean, previou
             }
         }
         StepVisualV2(s.patientGroup!!, step.id)
+        if (step.id == "compressions") {
+            Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = if (dark) Color(0xFF123D62) else Color(0xFFE2F6F6))) {
+                Column(Modifier.fillMaxWidth().padding(18.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                    Text("شمارشگر خودکار ماساژ قلبی", color = if (dark) Color.White else Color(0xFF073A55), fontWeight = FontWeight.Black)
+                    Text(if (ventilationCue > 0) "تنفس کمکی ${if (ventilationCue == 1) "اول" else "دوم"}" else "$compressionCount / $compressionTarget", color = if (dark) Color(0xFF5CF0E4) else Color(0xFF087F8C), fontSize = 38.sp, fontWeight = FontWeight.Black)
+                    Text(if (ventilationCue > 0) "اکنون تنفس را بدهید؛ هر تنفس حدود یک ثانیه و فقط تا بالا آمدن قفسه سینه." else "ریتم هدف: ۱۰۰ تا ۱۲۰ فشار در دقیقه", color = fg, textAlign = TextAlign.Center, fontSize = 12.sp)
+                    Text(if (hasBreaths) "نسبت این مسیر: $compressionTarget فشار به ۲ تنفس" else "فشارهای پیوسته؛ بدون توقف برای تنفس", color = fg, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+        if (step.id == "compressions") {
+            Button(onClick = { audio.stop(); next() }, modifier = Modifier.fillMaxWidth()) { Text("دستگاه AED / مرحله بعد آماده است") }
+        }
         if (index == steps.lastIndex) Text("مراحل صوتی پایان یافت؛ احیا را تا رسیدن کمک ادامه دهید.", color = fg)
         Button(onClick = { autoAdvance?.cancel(); audio.stop(); rosc() }, modifier = Modifier.fillMaxWidth().height(62.dp), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF159B59))) {
             Text("علائم حیاتی برگشت", fontSize = 19.sp, fontWeight = FontWeight.Black)
@@ -261,7 +327,7 @@ private fun StepVisualV2(group: PatientGroup, id: String) {
 }
 
 @Composable
-private fun LicensedGuideV2(dark: Boolean, back: () -> Unit) {
+private fun LicensedGuideV2(dark: Boolean, back: () -> Unit, home: () -> Unit) {
     val ctx = LocalContext.current
     val fg = if (dark) Color.White else Color(0xFF10264A)
     val bg = if (dark) listOf(Color(0xFF031943), Color(0xFF062B68)) else listOf(Color(0xFFEAF3FF), Color(0xFFF7FAFF))
@@ -282,7 +348,17 @@ private fun LicensedGuideV2(dark: Boolean, back: () -> Unit) {
     )
     var zoom by remember { mutableStateOf(0) }
     Column(Modifier.fillMaxSize().background(Brush.verticalGradient(bg)).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) { OutlinedButton(onClick = back) { Text("بازگشت") }; Spacer(Modifier.weight(1f)); Text("راهنمای تصویری", color = fg, fontWeight = FontWeight.Black) }
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) { OutlinedButton(onClick = back) { Text("بازگشت") }; Spacer(Modifier.weight(1f)); TextButton(onClick = home) { Icon(Icons.Filled.Home, null); Text("صفحه اول") } }
+        Text("راهنمای استفاده و آموزش مراحل BLS", color = fg, fontSize = 21.sp, fontWeight = FontWeight.Black)
+        Text("این بخش برای مطالعه و آشنایی پیش از شرایط اضطراری است. در حادثه واقعی ابتدا با ۱۱۵ تماس بگیرید و از دستور اپراتور پیروی کنید.", color = fg, fontSize = 13.sp)
+        Text("راهنمای استفاده: در صفحه اول گروه سنی را انتخاب کنید؛ سپس نوع و تعداد امدادگران را مشخص کنید. هنگام احیا، صدا و شمارشگر خودکار اجرا می‌شوند. دکمه تکرار برای شنیدن دوباره دستور و دکمه مرحله قبل برای برگشت است. در صورت بازگشت علائم حیاتی، دکمه سبز را لمس کنید. دکمه صفحه اول در تمام صفحات برای خروج سریع در دسترس است.", color = fg, fontSize = 13.sp, lineHeight = 21.sp)
+        Text("""بزرگسال: ایمنی صحنه، بررسی پاسخ و تنفس، تماس با ۱۱۵، فشارهای قفسه سینه با سرعت ۱۰۰ تا ۱۲۰ در دقیقه و نسبت ۳۰:۲ در صورت امکان تنفس کمکی.
+
+کودک: عمق فشار حدود یک‌سوم قطر قفسه سینه؛ یک امدادگر ۳۰:۲ و دو امدادگر آموزش‌دیده ۱۵:۲.
+
+شیرخوار: فشار با دو شست و دست‌های حلقه‌شده یا پاشنه یک دست؛ روش دو انگشتی استفاده نشود. یک امدادگر ۳۰:۲ و دو امدادگر آموزش‌دیده ۱۵:۲.
+
+در همه گروه‌ها بازگشت کامل قفسه سینه و حداقل وقفه را رعایت کنید.""", color = fg, fontSize = 13.sp, lineHeight = 21.sp)
         items.forEach { item ->
             val r = remember(item.second) { ctx.resources.getIdentifier(item.second, "drawable", ctx.packageName) }
             Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White)) {
@@ -307,7 +383,7 @@ private fun LicensedGuideV2(dark: Boolean, back: () -> Unit) {
 }
 
 @Composable
-private fun PostRoscV2(dark: Boolean, back: () -> Unit, restart: () -> Unit) {
+private fun PostRoscV2(dark: Boolean, back: () -> Unit, restart: () -> Unit, home: () -> Unit) {
     val ctx = LocalContext.current
     val fg = if (dark) Color.White else Color(0xFF10264A)
     val bg = if (dark) listOf(Color(0xFF031943), Color(0xFF062B68)) else listOf(Color(0xFFEAF3FF), Color(0xFFF7FAFF))
@@ -321,7 +397,10 @@ private fun PostRoscV2(dark: Boolean, back: () -> Unit, restart: () -> Unit) {
         "بدحال‌شدن مجدد" to "اگر بیهوش شد و تنفس طبیعی نداشت، فوراً احیا را از سر بگیرید."
     )
     Column(Modifier.fillMaxSize().background(Brush.verticalGradient(bg)).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        OutlinedButton(onClick = back) { Text("بازگشت به راهنمای احیا") }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            OutlinedButton(onClick = back) { Text("بازگشت به راهنمای احیا") }
+            TextButton(onClick = home) { Icon(Icons.Filled.Home, null); Text("صفحه اول") }
+        }
         Text("مراقبت پس از بازگشت علائم حیاتی", color = fg, fontSize = 21.sp, fontWeight = FontWeight.Black)
         Text("این صفحه راهنمای صوتی ندارد؛ مراحل را بخوانید و بیمار را پیوسته پایش کنید.", color = fg, fontSize = 12.sp)
         steps.forEachIndexed { i, item ->

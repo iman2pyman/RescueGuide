@@ -25,3 +25,13 @@
 
 ## تأیید پزشکی
 محتوای پزشکی باید پیش از انتشار عمومی توسط متخصص مسئول با راهنماهای رسمی AHA/AAP 2025 تطبیق داده و تأیید شود. موفقیت ساخت نرم‌افزار به معنی تأیید پزشکی یا اثبات ایمنی بالینی نیست.
+
+
+## 0.36.0-dev — theme and CPR counter implementation implementation candidate
+- Reworked the shared dark/light palette toward the approved navy/teal/blue-violet visual direction.
+- Added a persistent home shortcut on the guide, rescuer-selection, active CPR, and post-ROSC screens.
+- Expanded the guide screen with usage instructions and BLS study summaries for adults, children, and infants.
+- Added trained-rescuer count selection for pediatric pathways; one rescuer uses 30:2 and two trained rescuers use 15:2. Adult path remains 30:2.
+- Added a visual and audible compression counter (100–120/min target) that starts on the compressions step, followed by two ventilation cues when rescue breaths are enabled. The cue is a timing prompt, not a ventilator or bag-mask simulator.
+- Updated the explanatory AED text while leaving all existing Persian voice assets unchanged.
+- Build and device validation are still required before this implementation candidate can be treated as a release.

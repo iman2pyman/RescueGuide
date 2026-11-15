@@ -12,7 +12,7 @@ data class SessionFlowState(
 sealed interface SessionFlowAction {
     data class ChooseModule(val module: AppModule) : SessionFlowAction
     data class ChoosePatient(val group: PatientGroup) : SessionFlowAction
-    data class ChooseRescuer(val type: RescuerType) : SessionFlowAction
+    data class ChooseRescuer(val type: RescuerType, val trainedCount: Int = 1) : SessionFlowAction
     data class ChooseRescueBreaths(val canProvide: Boolean) : SessionFlowAction
     data class ChooseTrainedRescuerCount(val count: Int) : SessionFlowAction
     data object ContinueToReviewGate : SessionFlowAction
@@ -40,7 +40,7 @@ object SessionFlowReducer {
                     selection = current.copy(
                         rescuerType = action.type,
                         canProvideRescueBreaths = action.type == RescuerType.TRAINED_RESCUER || current.patientGroup != PatientGroup.ADULT,
-                        trainedRescuerCount = 1
+                        trainedRescuerCount = if (action.type == RescuerType.TRAINED_RESCUER) action.trainedCount.coerceIn(1, 2) else 1
                     ),
                     activeStepIndex = 0
                 )
