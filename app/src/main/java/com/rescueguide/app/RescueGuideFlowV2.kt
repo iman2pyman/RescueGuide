@@ -87,7 +87,8 @@ fun RescueGuideRootV2() {
             }
         }, confirmButton = { TextButton(onClick = { settings = false }) { Text("بستن") } })
         if (about) AlertDialog(onDismissRequest = { about = false }, title = { Text("درباره RescueGuide") },
-            text = { Text("سازنده: ایمان محمدپور، کارشناس اورژانس.\n\nمبنای علمی: راهنماهای AHA/AAP 2025. مجوز و پدیدآورنده تصاویر در docs/IMAGE_ASSET_LICENSES.md درج شده است.\n\nاین برنامه جایگزین تماس با اورژانس ۱۱۵ یا آموزش عملی نیست.") },
+            text = { Text("سازنده: ایمان محمدپور، کارشناس اورژانس.\n\nمبنای علمی: راهنماهای AHA/AAP 2025. تصاویر از منابع دارای مجوز هستند: BruceBlaus (CC BY-SA 4.0)، Rama (CC BY-SA 3.0 France)، Tokino (مالکیت عمومی)، Children’s Health Queensland (CC BY-NC 4.0؛ فقط استفاده غیرتجاری)، Trakotako و TenarAiuola. فهرست پیوند منابع و مجوزها در فایل مجوز تصاویر آمده است.\n\nدو تصویر روش فشار شیرخوار فقط برای استفاده غیرتجاری مجازند؛ برای انتشار تجاری باید مجوز جداگانه گرفته یا تصاویر جایگزین شوند.\n\nاین برنامه جایگزین تماس با اورژانس ۱۱۵ یا آموزش عملی نیست.") },
+            dismissButton = { TextButton(onClick = { runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/iman2pyman/RescueGuide/blob/main/docs/IMAGE_ASSET_LICENSES.md"))) } }) { Text("منابع و مجوز تصاویر") } },
             confirmButton = { TextButton(onClick = { about = false }) { Text("متوجه شدم") } })
     }
 }
@@ -196,6 +197,7 @@ private fun ActiveV2(s: SessionSelection, stepIndex: Int, dark: Boolean, previou
             Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(step.title, color = Color(0xFF073A91), fontSize = 19.sp, fontWeight = FontWeight.Black)
                 Text(step.instruction, color = Color(0xFF142C4E), fontSize = 15.sp, lineHeight = 23.sp)
+                if (step.id == "ratio" && s.patientGroup != PatientGroup.ADULT) Text("اگر قادر به تنفس کمکی نیستید، فشارهای پیوسته را ادامه دهید.", color = Color(0xFFB3261E), fontWeight = FontWeight.Bold)
                 if (step.timeCritical) Text("اقدام فوری — برای تأیید منتظر نمانید.", color = Color(0xFFB3261E), fontWeight = FontWeight.Bold)
             }
         }
