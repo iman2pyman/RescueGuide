@@ -38,7 +38,7 @@ TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 curl --fail --location --retry 1 --connect-timeout 10 --max-time 60 \
   --user-agent "RescueGuide/0.34.0 licensed image fetcher" \
-  "https://www.anzcor.org/assets/generated-anzcor-guideline-pdfs/guideline-12-1-paediatric-basic-life-support-254.pdf" \
+  "https://www.anzcor.org/assets/generated-anzcor-guideline-pdfs/guideline-12-1-paediatric-basic-life-support-254.pdf?v=1790644122" \
   -o "$TMP/anzcor-guideline-12-1.pdf"
 pdfimages -f 12 -l 12 -j "$TMP/anzcor-guideline-12-1.pdf" "$TMP/two-thumb"
 pdfimages -f 13 -l 13 -j "$TMP/anzcor-guideline-12-1.pdf" "$TMP/one-hand"
