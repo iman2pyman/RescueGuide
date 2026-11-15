@@ -59,7 +59,7 @@ jobs:
         if: success()
         run: |
           zip -qr RescueGuide-0.34.0-dev-FULL-SOURCE.zip . \
-            -x ".git/*" "*/build/*" "build/*" \
+            -x ".git/*" ".gradle/*" ".kotlin/*" "*/build/*" "build/*" \
                "RescueGuide-0.33.0-dev-FINAL-SOURCE.zip" \
                "SOURCE_FILES_SHA256.txt"
 
