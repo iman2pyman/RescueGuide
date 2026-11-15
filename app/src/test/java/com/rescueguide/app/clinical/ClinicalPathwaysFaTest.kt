@@ -39,19 +39,6 @@ class ClinicalPathwaysFaTest {
         assertTrue(infant.steps.any { it.instruction.contains("هر ۲ تا ۳ ثانیه") && it.instruction.contains("کمتر از ۶۰") })
     }
 
-    @Test fun infantChokingNeverUsesAbdominalThrusts() {
-        val text = ClinicalPathwaysFa.get(AppModule.CHOKING, PatientGroup.INFANT, RescuerType.LAY_RESCUER)
-            .steps.joinToString(" ") { it.instruction }
-        assertTrue(text.contains("هرگز فشار شکمی وارد نکنید"))
-    }
-
-    @Test fun pregnancyChokingUsesChestThrustAlternative() {
-        val text = ClinicalPathwaysFa.get(AppModule.CHOKING, PatientGroup.ADULT, RescuerType.LAY_RESCUER)
-            .steps.joinToString(" ") { it.instruction }
-        assertTrue(text.contains("باردار"))
-        assertTrue(text.contains("فشار قفسه سینه"))
-    }
-
     @Test fun childTwoTrainedRescuersUseFifteenToTwoWhenBreathsAreProvided() {
         val path = ClinicalPathwaysFa.get(AppModule.BASIC_LIFE_SUPPORT, PatientGroup.CHILD, RescuerType.TRAINED_RESCUER, true, 2)
         assertTrue(path.steps.any { it.instruction.contains("۱۵ به ۲") })

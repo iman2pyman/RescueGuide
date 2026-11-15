@@ -12,8 +12,8 @@ android {
         applicationId = "com.rescueguide.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 30
-        versionName = "0.30.0-dev"
+        versionCode = 33
+        versionName = "0.33.0-dev"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

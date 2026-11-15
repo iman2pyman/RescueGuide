@@ -1,7 +1,7 @@
 package com.rescueguide.app.domain
 
 /** Clinical pathways stay unavailable until the clinical bundle is reviewed and approved. */
-enum class AppModule { BASIC_LIFE_SUPPORT, CHOKING }
+enum class AppModule { BASIC_LIFE_SUPPORT }
 enum class PatientGroup { ADULT, CHILD, INFANT }
 enum class RescuerType { LAY_RESCUER, TRAINED_RESCUER }
 

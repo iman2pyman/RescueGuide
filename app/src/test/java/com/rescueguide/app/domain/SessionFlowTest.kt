@@ -8,10 +8,10 @@ import org.junit.Test
 class SessionFlowTest {
     @Test fun moduleChoiceStartsFreshSelection() {
         val state = SessionFlowReducer.reduce(
-            SessionFlowState(), SessionFlowAction.ChooseModule(AppModule.CHOKING)
+            SessionFlowState(), SessionFlowAction.ChooseModule(AppModule.BASIC_LIFE_SUPPORT)
         )
         assertEquals(SessionPage.SELECTION, state.page)
-        assertEquals(AppModule.CHOKING, state.selection?.module)
+        assertEquals(AppModule.BASIC_LIFE_SUPPORT, state.selection?.module)
         assertFalse(state.selection!!.isComplete)
     }
 
@@ -65,7 +65,7 @@ class SessionFlowTest {
 
     @Test fun backFromGatePreservesChoicesAndBackFromSelectionReturnsHome() {
         var state = SessionFlowState(page = SessionPage.SELECTION,
-            selection = SessionSelection(AppModule.CHOKING, PatientGroup.ADULT, RescuerType.LAY_RESCUER, canProvideRescueBreaths = false))
+            selection = SessionSelection(AppModule.BASIC_LIFE_SUPPORT, PatientGroup.ADULT, RescuerType.LAY_RESCUER, canProvideRescueBreaths = false))
         state = SessionFlowReducer.reduce(state, SessionFlowAction.ContinueToReviewGate)
         state = SessionFlowReducer.reduce(state, SessionFlowAction.Back)
         assertEquals(SessionPage.SELECTION, state.page)
@@ -76,7 +76,7 @@ class SessionFlowTest {
 
     @Test fun resetClearsSelectionAndPage() {
         val state = SessionFlowState(SessionPage.REVIEW_GATE,
-            SessionSelection(AppModule.CHOKING, PatientGroup.INFANT, RescuerType.LAY_RESCUER))
+            SessionSelection(AppModule.BASIC_LIFE_SUPPORT, PatientGroup.INFANT, RescuerType.LAY_RESCUER))
         assertEquals(SessionFlowState(), SessionFlowReducer.reduce(state, SessionFlowAction.Reset))
     }
 }

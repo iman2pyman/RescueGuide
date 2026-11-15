@@ -2,9 +2,10 @@
     <style name="Theme.RescueGuide" parent="android:style/Theme.Material.Light.NoActionBar">
         <item name="android:fontFamily">sans</item>
         <item name="android:colorAccent">#0B4F71</item>
-        <item name="android:windowLightStatusBar">true</item>
-        <item name="android:statusBarColor">#F3F7FA</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:statusBarColor">#031943</item>
         <item name="android:navigationBarColor">#0B2545</item>
+        <item name="android:windowLightNavigationBar">false</item>
         <item name="android:windowActionModeOverlay">true</item>
     </style>
 </resources>
