@@ -40,6 +40,9 @@ jobs:
         with:
           gradle-version: '8.13'
 
+      - name: Fetch license-cleared offline image assets
+        run: bash tools/fetch_licensed_images.sh
+
       - name: Validate Gradle project
         run: gradle --no-daemon --stacktrace tasks --all
 
