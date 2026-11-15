@@ -12,7 +12,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: licensed-image-sync-${{ github.ref }}
+  group: licensed-image-sync-v2-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
