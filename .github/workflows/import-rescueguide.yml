@@ -1,11 +1,11 @@
-name: Import RescueGuide 0.30.0 source ZIP
+name: Import RescueGuide 0.33.0 source ZIP
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'RescueGuide-0.30.0-dev-FINAL-SOURCE.zip'
+      - 'RescueGuide-0.33.0-dev-FINAL-SOURCE.zip'
   workflow_dispatch:
 
 permissions:
@@ -22,7 +22,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ZIP_FILE="RescueGuide-0.30.0-dev-FINAL-SOURCE.zip"
+          ZIP_FILE="RescueGuide-0.33.0-dev-FINAL-SOURCE.zip"
           if [ ! -f "$ZIP_FILE" ]; then
             echo "Upload $ZIP_FILE to the repository root first."
             exit 1
@@ -48,7 +48,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "No extracted source changes to commit."
           else
-            git commit -m "Import RescueGuide 0.30.0-dev final source"
+            git commit -m "Import RescueGuide 0.33.0-dev final source"
             git fetch origin main
             git rebase origin/main
             git push origin HEAD:main
