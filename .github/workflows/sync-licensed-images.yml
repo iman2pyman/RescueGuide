@@ -11,8 +11,13 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: licensed-image-sync-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   fetch-and-commit:
+    timeout-minutes: 15
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
