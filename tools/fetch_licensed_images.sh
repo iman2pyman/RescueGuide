@@ -7,9 +7,7 @@ fetch_one() {
   local name="$1" filename="$2" kind="$3"
   local target="$DEST/$name"
   local url="https://commons.wikimedia.org/wiki/Special:FilePath/$filename"
-  curl --fail --location --retry 1 --retry-delay 1 --connect-timeout 10 --max-time 30 \
-    --user-agent "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/130.0 Safari/537.36" \\
-  --referer "https://www.anzcor.org/" -H "Accept: application/pdf,*/*" "$url" -o "$target"
+  curl --fail --location --retry 1 --retry-delay 1 --connect-timeout 10 --max-time 30 --user-agent "RescueGuide/0.34.0 licensed image fetcher" "$url" -o "$target"
   local info
   info="$(file -b "$target")"
   [[ "$info" == *"$kind"* ]] || { echo "Invalid image type for $name: $info" >&2; exit 1; }
