@@ -18,6 +18,7 @@ cat <<'ASSETS' | xargs -r -P 4 -n 3 bash -c 'fetch_one "$@"' _
 guide_adult_airway.png CPR_Adult_Airway.png PNG
 guide_adult_compressions.png CPR_Adult_Chest_Compression.png PNG
 guide_adult_breathing.jpg Insulfation.jpg JPEG
+guide_checking_respiration.jpg Checking_respiration.jpg JPEG
 guide_child_breathing.png CPR_Child_Blow_In_Air.png PNG
 guide_child_compressions.png CPR_Child_Chest_Compression.png PNG
 guide_infant_airway.png CPR_Infant_Closed_vs_Open_Airway.png PNG
@@ -51,5 +52,5 @@ cp "$thumb" "$DEST/guide_infant_compressions.jpg"
 cp "$onehand" "$DEST/guide_infant_compressions_onehand.jpg"
 rm -f "$DEST/guide_infant_compressions.png"
 count="$(find "$DEST" -maxdepth 1 -type f -name 'guide_*' | wc -l)"
-[[ "$count" -eq 14 ]] || { echo "Expected 14 licensed images, found $count" >&2; exit 1; }
+[[ "$count" -eq 15 ]] || { echo "Expected 15 licensed images, found $count" >&2; exit 1; }
 echo "Fetched $count licensed image assets; infant compressions use two-thumb and one-hand illustrations, not two-finger."

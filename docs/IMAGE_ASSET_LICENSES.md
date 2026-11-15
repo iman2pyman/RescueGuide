@@ -7,6 +7,7 @@ The following original images are bundled as visual aids. Their source pages sta
 | guide_adult_airway.png | BruceBlaus | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:CPR_Adult_Airway.png |
 | guide_adult_compressions.png | BruceBlaus | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:CPR_Adult_Chest_Compression.png |
 | guide_adult_breathing.jpg | Rama | CC BY-SA 3.0 France / CC BY-SA 2.0 France | https://commons.wikimedia.org/wiki/File:Insulfation.jpg |
+| guide_checking_respiration.jpg | Rama | CC BY-SA 3.0 France / CC BY-SA 2.0 France | https://commons.wikimedia.org/wiki/File:Checking_respiration.jpg |
 | guide_child_breathing.png | BruceBlaus | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:CPR_Child_Blow_In_Air.png |
 | guide_child_compressions.png | BruceBlaus | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:CPR_Child_Chest_Compression.png |
 | guide_infant_compressions.jpg | Children’s Health Queensland, Figure 6, ANZCOR Guideline 12.1 (p. 12) | CC BY-NC 4.0 | https://www.anzcor.org/assets/generated-anzcor-guideline-pdfs/guideline-12-1-paediatric-basic-life-support-pbls-for-health-professionals-254.pdf |

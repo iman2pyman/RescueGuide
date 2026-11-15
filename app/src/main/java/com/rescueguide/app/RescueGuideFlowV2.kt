@@ -13,6 +13,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.MonitorHeart
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -221,8 +223,14 @@ private fun StepVisualV2(group: PatientGroup, id: String) {
         id == "compressions" && group == PatientGroup.INFANT -> Triple("فشار شیرخوار", "guide_infant_compressions", "دو شست با دست‌های حلقه‌شده؛ نه روش دو انگشتی.")
         id == "compressions" && group == PatientGroup.CHILD -> Triple("فشار کودک", "guide_child_compressions", "یک یا دو دست متناسب با جثه.")
         id == "compressions" -> Triple("فشار بزرگسال", "guide_adult_compressions", "پاشنه دست‌ها روی نیمه پایینی جناغ.")
-        id == "breathing" && group == PatientGroup.INFANT -> Triple("راه هوایی شیرخوار", "guide_infant_airway", "سر در وضعیت خنثی یا کمی متمایل به عقب.")
-        id == "breathing" -> Triple("باز کردن راه هوایی", "guide_adult_airway", "سر به عقب و چانه بالا.")
+        id == "scene" -> Triple("ایمنی صحنه", "", "پیش از نزدیک شدن، از ایمن بودن محیط مطمئن شوید.")
+        id == "response" -> Triple("بررسی پاسخ‌دهی", "", "بیمار را صدا بزنید و پاسخ او را بررسی کنید.")
+        id == "emergency" -> Triple("تماس با اورژانس", "", "با ۱۱۵ تماس بگیرید و دستگاه شوک درخواست کنید.")
+        id == "breathing" && group == PatientGroup.INFANT -> Triple("بررسی تنفس شیرخوار", "guide_infant_breathing_check", "گَس‌گَس تنفس طبیعی نیست.")
+        id == "breathing" -> Triple("بررسی تنفس", "guide_checking_respiration", "تنفس طبیعی را حداکثر طی ۱۰ ثانیه بررسی کنید.")
+        id == "continue" && group == PatientGroup.INFANT -> Triple("ادامه احیا", "guide_infant_compressions", "فشارها را با حداقل وقفه ادامه دهید.")
+        id == "continue" && group == PatientGroup.CHILD -> Triple("ادامه احیا", "guide_child_compressions", "فشارها را با حداقل وقفه ادامه دهید.")
+        id == "continue" -> Triple("ادامه احیا", "guide_adult_compressions", "فشارها را با حداقل وقفه ادامه دهید.")
         id == "ratio" && group == PatientGroup.INFANT -> Triple("تنفس شیرخوار", "guide_infant_breathing", "دهان و بینی را بپوشانید.")
         id == "ratio" && group == PatientGroup.CHILD -> Triple("تنفس کودک", "guide_child_breathing", "فقط تا بالا آمدن قفسه سینه.")
         id == "ratio" -> Triple("تنفس بزرگسال", "guide_adult_breathing", "بینی را ببندید و حدود یک ثانیه هوا بدهید.")
@@ -235,6 +243,9 @@ private fun StepVisualV2(group: PatientGroup, id: String) {
         Column(Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Text(data.first, color = Color(0xFF073A91), fontWeight = FontWeight.Bold)
             if (resource != 0) Image(painterResource(resource), data.first, Modifier.fillMaxWidth().height(175.dp).clickable { zoom = resource }, contentScale = ContentScale.Fit)
+            else if (id == "emergency") Icon(Icons.Filled.Call, contentDescription = data.first, tint = Color(0xFF0B62C8), modifier = Modifier.size(88.dp).padding(12.dp))
+            else if (id == "response") Icon(Icons.Filled.Person, contentDescription = data.first, tint = Color(0xFF0B62C8), modifier = Modifier.size(88.dp).padding(12.dp))
+            else if (id == "scene") Icon(Icons.Filled.Info, contentDescription = data.first, tint = Color(0xFF0B62C8), modifier = Modifier.size(88.dp).padding(12.dp))
             else Text("تصویر آموزشی در مرحله دریافت دارایی‌ها قرار می‌گیرد.", color = Color(0xFF31577D), modifier = Modifier.padding(20.dp))
             Text(data.third, color = Color(0xFF17385F), fontSize = 12.sp, textAlign = TextAlign.Center)
         }
@@ -257,6 +268,7 @@ private fun LicensedGuideV2(dark: Boolean, back: () -> Unit) {
     val items = listOf(
         Triple("فشار بزرگسال", "guide_adult_compressions", "محل دست‌ها روی جناغ."),
         Triple("راه هوایی بزرگسال", "guide_adult_airway", "سر به عقب و چانه بالا."),
+        Triple("بررسی تنفس", "guide_checking_respiration", "تنفس طبیعی را بررسی کنید."),
         Triple("تنفس بزرگسال", "guide_adult_breathing", "هر تنفس حدود یک ثانیه."),
         Triple("فشار کودک", "guide_child_compressions", "یک یا دو دست متناسب با جثه."),
         Triple("تنفس کودک", "guide_child_breathing", "فقط تا بالا آمدن قفسه سینه."),
