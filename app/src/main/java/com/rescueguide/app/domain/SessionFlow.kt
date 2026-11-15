@@ -1,6 +1,6 @@
 package com.rescueguide.app.domain
 
-/** Navigation-only state. It deliberately has no authority to start clinical guidance. */
+/** Navigation state for the selected BLS patient and rescuer path. */
 enum class SessionPage { HOME, SELECTION, REVIEW_GATE, ACTIVE_PATH }
 
 data class SessionFlowState(
@@ -39,7 +39,7 @@ object SessionFlowReducer {
                     page = SessionPage.ACTIVE_PATH,
                     selection = current.copy(
                         rescuerType = action.type,
-                        canProvideRescueBreaths = action.type == RescuerType.TRAINED_RESCUER,
+                        canProvideRescueBreaths = action.type == RescuerType.TRAINED_RESCUER || current.patientGroup != PatientGroup.ADULT,
                         trainedRescuerCount = 1
                     ),
                     activeStepIndex = 0

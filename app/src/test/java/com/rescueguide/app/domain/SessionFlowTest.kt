@@ -17,7 +17,7 @@ class SessionFlowTest {
         state = SessionFlowReducer.reduce(state, SessionFlowAction.ChooseRescuer(RescuerType.LAY_RESCUER))
         assertEquals(SessionPage.ACTIVE_PATH, state.page)
         assertEquals(PatientGroup.INFANT, state.selection?.patientGroup)
-        assertEquals(false, state.selection?.canProvideRescueBreaths)
+        assertEquals(true, state.selection?.canProvideRescueBreaths)
         assertTrue(state.selection!!.isComplete)
     }
 

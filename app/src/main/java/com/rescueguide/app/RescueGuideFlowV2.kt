@@ -36,6 +36,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.rescueguide.app.clinical.ClinicalPathwaysFa
 import com.rescueguide.app.domain.*
 import com.rescueguide.app.platform.OfflinePersianAudioPlayer
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -169,20 +170,25 @@ private fun ActiveV2(s: SessionSelection, stepIndex: Int, dark: Boolean, previou
     val fg = if (dark) Color.White else Color(0xFF10264A)
     val sub = if (dark) Color(0xFFD6E7FF) else Color(0xFF31577D)
     val lifecycle = LocalLifecycleOwner.current
-    LaunchedEffect(step.id) {
+    var autoAdvance by remember { mutableStateOf<Job?>(null) }
+    fun speakCurrentStep() {
         audio.stop()
-        val ok = audio.play(step.instruction) { scope.launch { delay(2000); if (index < steps.lastIndex) next() } }
-        if (!ok) { delay(9000); if (index < steps.lastIndex) next() }
+        autoAdvance?.cancel()
+        val started = audio.play(step.instruction) {
+            autoAdvance?.cancel()
+            autoAdvance = scope.launch { delay(2000); if (index < steps.lastIndex) next() }
+        }
+        if (!started) autoAdvance = scope.launch { delay(9000); if (index < steps.lastIndex) next() }
     }
+    LaunchedEffect(step.id) { speakCurrentStep() }
     DisposableEffect(audio, lifecycle) {
         val observer = LifecycleEventObserver { _, e -> if (e == Lifecycle.Event.ON_STOP) audio.stop() }
         lifecycle.lifecycle.addObserver(observer)
-        onDispose { lifecycle.lifecycle.removeObserver(observer); audio.release() }
+        onDispose { autoAdvance?.cancel(); lifecycle.lifecycle.removeObserver(observer); audio.release() }
     }
     Column(Modifier.fillMaxSize().background(Brush.verticalGradient(if (dark) listOf(Color(0xFF031943), Color(0xFF062B68)) else listOf(Color(0xFFEAF3FF), Color(0xFFF7FAFF))))
         .verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            OutlinedButton(onClick = exit) { Text("پایان راهنما") }
             Text("مرحله " + (index + 1) + " از " + steps.size, color = fg)
         }
         Text("راهنمای احیای پایه", color = fg, fontSize = 22.sp, fontWeight = FontWeight.Black)
@@ -195,12 +201,12 @@ private fun ActiveV2(s: SessionSelection, stepIndex: Int, dark: Boolean, previou
         }
         StepVisualV2(s.patientGroup!!, step.id)
         if (index == steps.lastIndex) Text("مراحل صوتی پایان یافت؛ احیا را تا رسیدن کمک ادامه دهید.", color = fg)
-        Button(onClick = { audio.stop(); rosc() }, modifier = Modifier.fillMaxWidth().height(62.dp), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF159B59))) {
+        Button(onClick = { autoAdvance?.cancel(); audio.stop(); rosc() }, modifier = Modifier.fillMaxWidth().height(62.dp), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF159B59))) {
             Text("علائم حیاتی برگشت", fontSize = 19.sp, fontWeight = FontWeight.Black)
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = { audio.stop(); previous() }, enabled = index > 0, modifier = Modifier.weight(1f)) { Text("مرحله قبل") }
-            Button(onClick = { audio.play(step.instruction) }, modifier = Modifier.weight(1f)) { Text("تکرار توضیح فعلی") }
+            OutlinedButton(onClick = { autoAdvance?.cancel(); audio.stop(); previous() }, enabled = index > 0, modifier = Modifier.weight(1f)) { Text("مرحله قبل") }
+            Button(onClick = { speakCurrentStep() }, modifier = Modifier.weight(1f)) { Text("تکرار توضیح فعلی") }
         }
         Text("راهنمای صوتی خودکار پیش می‌رود؛ برای اقدامات حیاتی منتظر تأیید نمانید. با ۱۱۵ تماس بگیرید و از اپراتور پیروی کنید.", color = sub, fontSize = 11.sp)
     }
