@@ -1,0 +1,33 @@
+name: Sync licensed image assets
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/fetch_licensed_images.sh'
+      - 'docs/IMAGE_ASSET_LICENSES.md'
+      - 'app/src/main/java/com/rescueguide/app/RescueGuideFlowV2.kt'
+
+permissions:
+  contents: write
+
+jobs:
+  fetch-and-commit:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch verified Commons image assets
+        run: bash tools/fetch_licensed_images.sh
+      - name: Commit image assets to source
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/src/main/res/drawable-nodpi/guide_*
+          if git diff --cached --quiet; then
+            echo "Licensed images already synchronized."
+          else
+            git commit -m "Add licensed offline RescueGuide illustrations"
+            git push
+          fi
