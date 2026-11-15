@@ -53,14 +53,15 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Preserve the repository-managed workflows; the ZIP's workflow copies
+          # are intentionally not committed by this importer.
+          git restore --source=HEAD --staged --worktree -- .github/workflows/import-rescueguide.yml .github/workflows/android.yml
           git add -A
-          # Keep this importer workflow under separate maintenance.
-          git reset -q -- .github/workflows/import-rescueguide.yml .github/workflows/android.yml || true
           if git diff --cached --quiet; then
             echo "No extracted source changes to commit."
           else
             git commit -m "Import RescueGuide 0.36.0-dev source"
-            # The workflow checked out the latest main commit at job start.
-            # Push directly; a concurrent push will fail safely and can be retried.
+            git fetch origin main
+            git rebase origin/main
             git push origin HEAD:main
           fi
