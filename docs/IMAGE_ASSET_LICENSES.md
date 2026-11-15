@@ -33,3 +33,6 @@ The two infant compression photographs are licensed **CC BY-NC 4.0**, which perm
 CC BY-SA files are redistributed unmodified with author credit, source page and license link. If adapted, the modification must be identified and the adapted asset distributed under the same or a compatible ShareAlike license. No endorsement by the artists, Wikimedia Commons, ANZCOR, AHA or AAP is implied.
 
 Run `bash tools/fetch_licensed_images.sh` to download the image assets into `app/src/main/res/drawable-nodpi/`.
+
+
+Asset sync note: the infant two-thumb and one-hand figures are extracted from ANZCOR PDF pages 12 and 13 and remain subject to the non-commercial CC BY-NC 4.0 restriction above.
