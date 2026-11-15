@@ -33,7 +33,18 @@ object SessionFlowReducer {
             state.copy(selection = state.selection?.copy(patientGroup = action.group))
         } else state
         is SessionFlowAction.ChooseRescuer -> if (state.page == SessionPage.SELECTION) {
-            state.copy(selection = state.selection?.copy(rescuerType = action.type))
+            val current = state.selection
+            if (current?.patientGroup == null) state else {
+                state.copy(
+                    page = SessionPage.ACTIVE_PATH,
+                    selection = current.copy(
+                        rescuerType = action.type,
+                        canProvideRescueBreaths = action.type == RescuerType.TRAINED_RESCUER,
+                        trainedRescuerCount = 1
+                    ),
+                    activeStepIndex = 0
+                )
+            }
         } else state
         is SessionFlowAction.ChooseRescueBreaths -> if (state.page == SessionPage.SELECTION) {
             state.copy(selection = state.selection?.copy(canProvideRescueBreaths = action.canProvide))
@@ -51,7 +62,7 @@ object SessionFlowReducer {
             SessionPage.HOME -> state
             SessionPage.SELECTION -> SessionFlowState()
             SessionPage.REVIEW_GATE -> state.copy(page = SessionPage.SELECTION)
-            SessionPage.ACTIVE_PATH -> state.copy(page = SessionPage.REVIEW_GATE, activeStepIndex = 0)
+            SessionPage.ACTIVE_PATH -> state.copy(page = SessionPage.SELECTION, activeStepIndex = 0)
         }
         SessionFlowAction.Reset -> SessionFlowState()
     }
