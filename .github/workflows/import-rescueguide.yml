@@ -59,7 +59,7 @@ jobs:
             echo "No extracted source changes to commit."
           else
             git commit -m "Import RescueGuide 0.36.0-dev source"
-            git fetch origin main
-            git rebase origin/main
+            # The workflow checked out the latest main commit at job start.
+            # Push directly; a concurrent push will fail safely and can be retried.
             git push origin HEAD:main
           fi
