@@ -5,9 +5,9 @@ on:
     branches:
       - main
     paths:
+      - 'RescueGuide-0.37.0-dev-FULL-SOURCE.zip'
       - 'RescueGuide-0.36.0-dev-FULL-SOURCE.zip'
       - 'RescueGuide-0.33.0-dev-FINAL-SOURCE.zip'
-      - '.github/workflows/import-rescueguide.yml'
   workflow_dispatch:
 
 permissions:
@@ -24,7 +24,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if [ -f "RescueGuide-0.36.0-dev-FULL-SOURCE.zip" ]; then
+          if [ -f "RescueGuide-0.37.0-dev-FULL-SOURCE.zip" ]; then
+            ZIP_FILE="RescueGuide-0.37.0-dev-FULL-SOURCE.zip"
+          elif [ -f "RescueGuide-0.36.0-dev-FULL-SOURCE.zip" ]; then
             ZIP_FILE="RescueGuide-0.36.0-dev-FULL-SOURCE.zip"
           elif [ -f "RescueGuide-0.33.0-dev-FINAL-SOURCE.zip" ]; then
             ZIP_FILE="RescueGuide-0.33.0-dev-FINAL-SOURCE.zip"
@@ -60,7 +62,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "No extracted source changes to commit."
           else
-            git commit -m "Import RescueGuide 0.36.0-dev source"
+            git commit -m "Import RescueGuide source ZIP"
             git fetch origin main
             git rebase origin/main
             git push origin HEAD:main
