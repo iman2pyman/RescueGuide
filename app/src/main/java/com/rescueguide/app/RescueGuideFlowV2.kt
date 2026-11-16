@@ -143,7 +143,7 @@ private fun Modifier.medicalBackdrop(dark: Boolean = true): Modifier = this
 
 @Composable
 private fun BrandHomeButton(onClick: () -> Unit) {
-    OutlinedButton(onClick = onClick, shape = RoundedCornerShape(18.dp), border = androidx.compose.foundation.BorderStroke(1.dp, NeonCyan.copy(alpha=.85f))) {
+    OutlinedButton(onClick = onClick, modifier = Modifier.border(1.dp, NeonCyan.copy(alpha = .85f), RoundedCornerShape(18.dp)), shape = RoundedCornerShape(18.dp)) {
         Icon(Icons.Filled.Home, null, tint = Color.White)
         Spacer(Modifier.width(6.dp))
         Text("صفحه اول", color = Color.White, fontWeight = FontWeight.Bold)
