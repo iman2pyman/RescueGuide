@@ -84,11 +84,11 @@ jobs:
       - name: Package complete source
         if: success()
         run: |
-          zip -qr RescueGuide-0.38.0-dev-FULL-SOURCE.zip . \
+          zip -qr RescueGuide-0.40.0-FULL-SOURCE.zip . \
             -x ".git/*" ".gradle/*" ".kotlin/*" "*/build/*" "build/*" \
                "*.jks" "*.keystore" "keystore.properties" \
                "RescueGuide-0.33.0-dev-FINAL-SOURCE.zip" \
-               "RescueGuide-0.38.0-dev-FULL-SOURCE.zip" \
+               "RescueGuide-0.40.0-FULL-SOURCE.zip" \
                "SOURCE_FILES_SHA256.txt"
 
       - name: Upload complete source
@@ -96,7 +96,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: rescueguide-full-source
-          path: RescueGuide-0.38.0-dev-FULL-SOURCE.zip
+          path: RescueGuide-0.40.0-FULL-SOURCE.zip
           if-no-files-found: error
           retention-days: 30
 
