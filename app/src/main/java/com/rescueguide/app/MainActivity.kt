@@ -98,9 +98,18 @@ import com.rescueguide.app.domain.SessionFlowAction
 import com.rescueguide.app.domain.SessionFlowReducer
 
 class MainActivity : ComponentActivity() {
+    private lateinit var bazaarBilling: BazaarBillingManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent { RescueGuideRootV2() }
+        bazaarBilling = BazaarBillingManager(applicationContext)
+        bazaarBilling.connect()
+        setContent { RescueGuideRootV2(bazaarBilling) }
+    }
+
+    override fun onDestroy() {
+        if (::bazaarBilling.isInitialized) bazaarBilling.disconnect()
+        super.onDestroy()
     }
 }
 

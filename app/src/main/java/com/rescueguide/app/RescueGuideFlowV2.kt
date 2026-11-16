@@ -1,5 +1,6 @@
 package com.rescueguide.app
 
+import androidx.activity.ComponentActivity
 import android.content.Intent
 import android.net.Uri
 import android.media.AudioManager
@@ -53,8 +54,11 @@ import kotlinx.coroutines.launch
 private fun SessionStateHome() = SessionFlowState()
 
 @Composable
-fun RescueGuideRootV2() {
+fun RescueGuideRootV2(billing: BazaarBillingManager) {
     val ctx = LocalContext.current
+    val activity = ctx as? ComponentActivity
+    val premiumEnabled by billing.isPremium.collectAsState()
+    val billingStatus by billing.status.collectAsState()
     val prefs = remember(ctx) { ctx.getSharedPreferences("rescueguide_settings", android.content.Context.MODE_PRIVATE) }
     var dark by remember { mutableStateOf(prefs.getBoolean("dark_theme", true)) }
     var flow by remember { mutableStateOf(SessionFlowState()) }
@@ -96,6 +100,26 @@ fun RescueGuideRootV2() {
                     Text(if (dark) "تم شب" else "تم روز")
                     Switch(dark, onCheckedChange = { dark = it; prefs.edit().putBoolean("dark_theme", it).apply() })
                 }
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                Text("دسترسی کامل RescueGuide", fontWeight = FontWeight.Bold)
+                Text(
+                    if (premiumEnabled) "دسترسی دائمی شما فعال است."
+                    else "با یک‌بار خرید، دسترسی کامل آموزشی برای حساب کافه‌بازار شما فعال می‌شود."
+                )
+                if (!premiumEnabled) {
+                    Button(
+                        onClick = { activity?.let { billing.purchase(it.activityResultRegistry) } },
+                        modifier = Modifier.fillMaxWidth()
+                    ) { Text("خرید دسترسی دائمی") }
+                } else {
+                    Text("✓ خرید دائمی تأیید شده است.", color = Color(0xFF00A878), fontWeight = FontWeight.Bold)
+                }
+                TextButton(onClick = { billing.restorePurchases() }) { Text("بازیابی خرید قبلی") }
+                Text(billingStatus, style = MaterialTheme.typography.bodySmall)
+                Text(
+                    "تماس اضطراری ۱۱۵ و راهنمای ضروری احیای پایه در شرایط واقعی، بدون پرداخت در دسترس می‌مانند.",
+                    style = MaterialTheme.typography.bodySmall
+                )
                 TextButton(onClick = { settings = false; guide = true }) { Text("راهنمای برنامه") }
                 TextButton(onClick = { settings = false; about = true }) { Text("درباره سازنده") }
             }
