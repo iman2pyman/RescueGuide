@@ -679,6 +679,13 @@ private fun ActivePathScreen(
     }
     val safeIndex = stepIndex.coerceIn(0, pathway.steps.lastIndex)
     val step = pathway.steps[safeIndex]
+    val compressionStartIndex = remember(pathway) { pathway.steps.indexOfFirst { it.id == "compressions" } }
+    val roscIndex = remember(pathway) { pathway.steps.indexOfFirst { it.id == "rosc" }.let { if (it < 0) pathway.steps.size else it } }
+    // Start the audible 100–120/min cue with the compression instruction and keep it
+    // running across ratio, AED and continuation steps; stop only on ROSC/end of CPR phase.
+    val cprPhaseActive = compressionStartIndex >= 0 && safeIndex >= compressionStartIndex && safeIndex < roscIndex
+    val latestCprPhaseActive by rememberUpdatedState(cprPhaseActive)
+    val latestMetronomeBpm by rememberUpdatedState(metronomeBpm)
     val latestInstruction by rememberUpdatedState(step.instruction)
     val reportRosc: () -> Unit = { metronome.stop(); metronomeRunning = false; onRosc() }
     val listenOnce: () -> Unit = {
@@ -707,8 +714,21 @@ private fun ActivePathScreen(
     }
     val activeLifecycle = LocalLifecycleOwner.current
     LaunchedEffect(step.instruction) { speechInput.stop(); audioPlayer.play(step.instruction) }
+    LaunchedEffect(cprPhaseActive, metronomeBpm) {
+        if (cprPhaseActive) {
+            if (!metronome.isRunning) metronomeRunning = metronome.start(metronomeBpm.toInt())
+        } else {
+            metronome.stop()
+            metronomeRunning = false
+        }
+    }
     DisposableEffect(audioPlayer, speechInput, metronome, activeLifecycle) {
         val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_START) {
+                if (latestCprPhaseActive && !metronome.isRunning) {
+                    metronomeRunning = metronome.start(latestMetronomeBpm.toInt())
+                }
+            }
             if (event == Lifecycle.Event.ON_STOP) {
                 speechInput.stop()
                 audioPlayer.stop()
@@ -745,14 +765,19 @@ private fun ActivePathScreen(
         if (selection.module == AppModule.BASIC_LIFE_SUPPORT) {
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("مترونوم فشار قفسه سینه", fontWeight = FontWeight.Bold)
+                    Text("شمارشگر صوتی فشار قفسه سینه", fontWeight = FontWeight.Bold)
                     Text("سرعت: ${metronomeBpm.toInt()} فشار در دقیقه")
                     Slider(value = metronomeBpm, onValueChange = { metronomeBpm = it }, valueRange = 100f..120f, steps = 19)
                     Button(onClick = {
                         if (metronomeRunning) { metronome.stop(); metronomeRunning = false }
                         else { metronomeRunning = metronome.start(metronomeBpm.toInt()) }
-                    }, modifier = Modifier.fillMaxWidth()) { Text(if (metronomeRunning) "توقف مترونوم" else "شروع مترونوم") }
-                    Text("مترونوم فقط ریتم را یادآوری می‌کند و عمق یا کیفیت فشار را اندازه‌گیری نمی‌کند.", style = MaterialTheme.typography.bodySmall)
+                    }, modifier = Modifier.fillMaxWidth()) { Text(if (metronomeRunning) "توقف موقت شمارشگر" else if (cprPhaseActive) "ادامه شمارشگر" else "شروع شمارشگر") }
+                    Text(
+                        if (cprPhaseActive) "شمارشگر از شروع توضیح فشارها فعال می‌شود و در مراحل نسبت، AED و ادامه احیا پیوسته می‌ماند؛ با گزارش بازگشت علائم حیاتی متوقف می‌شود."
+                        else "شمارشگر با شروع مرحله فشار قفسه سینه به‌طور خودکار آغاز می‌شود.",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    Text("مترونوم فقط ریتم ۱۰۰ تا ۱۲۰ در دقیقه را یادآوری می‌کند و عمق یا کیفیت فشار را اندازه‌گیری نمی‌کند.", style = MaterialTheme.typography.bodySmall)
                 }
             }
         }
