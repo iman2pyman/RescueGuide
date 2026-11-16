@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <queries>
+        <package android:name="com.farsitel.bazaar" />
         <intent>
             <action android:name="android.speech.RecognitionService" />
         </intent>
