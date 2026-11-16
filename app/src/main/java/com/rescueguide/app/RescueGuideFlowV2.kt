@@ -169,29 +169,70 @@ private fun HomeV2(dark: Boolean, choose: (PatientGroup) -> Unit, guide: () -> U
     val audio = remember(ctx) { OfflinePersianAudioPlayer(ctx) }
     DisposableEffect(audio) { onDispose { audio.release() } }
     LaunchedEffect(Unit) { audio.play("سلام، من رابط صوتی احیا هستم. آرامش خود را حفظ کنید. در شرایط اضطراری با ۱۱۵ تماس بگیرید.") }
-    val fg = Color.White
-    Column(Modifier.fillMaxSize().medicalBackdrop(dark).verticalScroll(rememberScrollState()).padding(horizontal=16.dp, vertical=12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Column(Modifier.fillMaxWidth().padding(top=5.dp), horizontalAlignment=Alignment.CenterHorizontally) {
-            Box(Modifier.size(82.dp), contentAlignment=Alignment.Center) {
-                Icon(Icons.Filled.Favorite, null, tint=Color(0xFF10D9EF), modifier=Modifier.size(76.dp))
-                Icon(Icons.Filled.MonitorHeart, null, tint=Color.White, modifier=Modifier.size(43.dp))
+    val robot = remember { ctx.resources.getIdentifier("home_robot", "drawable", ctx.packageName) }
+    Column(
+        Modifier.fillMaxSize().medicalBackdrop(dark).verticalScroll(rememberScrollState())
+            .padding(horizontal = 15.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(11.dp)
+    ) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                Modifier.size(58.dp).background(Brush.linearGradient(listOf(Color(0xFFFF4055), Color(0xFFB90032))), RoundedCornerShape(50))
+                    .border(1.5.dp, Color.White, RoundedCornerShape(50)),
+                contentAlignment = Alignment.Center
+            ) { Icon(Icons.Filled.MonitorHeart, null, tint=Color.White, modifier=Modifier.size(39.dp)) }
+            Spacer(Modifier.width(10.dp))
+            Column(Modifier.weight(1f)) {
+                Row(verticalAlignment=Alignment.CenterVertically) {
+                    Text("Rescue", color=Color.White, fontSize=26.sp, fontWeight=FontWeight.Black)
+                    Text("Guide", color=Color(0xFFFF4055), fontSize=26.sp, fontWeight=FontWeight.Black)
+                }
+                Text("دستیار صوتی احیای اضطراری", color=Color.White, fontSize=13.sp, fontWeight=FontWeight.Bold)
             }
-            Text("RescueGuide", color=Color.White, fontSize=31.sp, fontWeight=FontWeight.Black)
-            Text("راهنمای هوشمند احیای پایه", color=Color.White, fontSize=15.sp, fontWeight=FontWeight.Bold)
+            Column(
+                Modifier.background(Color(0xFF082A59), RoundedCornerShape(20.dp))
+                    .border(1.dp, NeonCyan.copy(alpha=.8f), RoundedCornerShape(20.dp)).padding(horizontal=10.dp, vertical=7.dp),
+                horizontalAlignment=Alignment.CenterHorizontally
+            ) {
+                Text("🇮🇷 ایران", color=Color.White, fontSize=12.sp, fontWeight=FontWeight.Bold)
+                Text("۱۱۵", color=Color(0xFFFFE34D), fontSize=19.sp, fontWeight=FontWeight.Black)
+            }
+        }
+        Row(Modifier.fillMaxWidth().height(184.dp), verticalAlignment=Alignment.CenterVertically, horizontalArrangement=Arrangement.spacedBy(5.dp)) {
+            if (robot != 0) Image(painterResource(robot), "دستیار صوتی RescueGuide", Modifier.weight(.9f).fillMaxSize(), contentScale=ContentScale.Fit)
+            Card(
+                Modifier.weight(1.1f).fillMaxHeight().border(1.5.dp, Color(0xFFB9D5FF), RoundedCornerShape(27.dp)),
+                shape=RoundedCornerShape(27.dp), colors=CardDefaults.cardColors(containerColor=Color(0xFFE8EEFF))
+            ) {
+                Column(Modifier.fillMaxSize().padding(horizontal=11.dp, vertical=12.dp), verticalArrangement=Arrangement.Center, horizontalAlignment=Alignment.CenterHorizontally) {
+                    Text("سلام! من دستیار صوتی احیا هستم.", color=Color(0xFF0756C8), fontSize=15.sp, fontWeight=FontWeight.Black, textAlign=TextAlign.Center)
+                    Text("در شرایط اضطراری، آرامش خود را حفظ کنید.", color=Color(0xFF15213B), fontSize=13.sp, fontWeight=FontWeight.Bold, textAlign=TextAlign.Center)
+                    Text("برای شروع، گروه سنی بیمار را انتخاب کنید.", color=Color(0xFF15213B), fontSize=12.sp, fontWeight=FontWeight.SemiBold, textAlign=TextAlign.Center)
+                }
+            }
         }
         VoiceWavePanel("سلام، من راهنمای صوتی احیا هستم")
         Text("گروه سنی بیمار را انتخاب کنید", color=Color.White, fontSize=18.sp, fontWeight=FontWeight.Black, modifier=Modifier.fillMaxWidth(), textAlign=TextAlign.Center)
         PatientTileV2("بزرگسال", "راهنمای احیای پایه بزرگسال", Color(0xFF087FE8)) { choose(PatientGroup.ADULT) }
         PatientTileV2("کودک", "از یک سال تا شروع بلوغ", Color(0xFF078FCB)) { choose(PatientGroup.CHILD) }
         PatientTileV2("شیرخوار", "زیر یک سال", Color(0xFF8437D1)) { choose(PatientGroup.INFANT) }
-        Button(onClick = { runCatching { ctx.startActivity(Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", EmergencyDirectory.iran.emergencyNumber, null))) } }, modifier=Modifier.fillMaxWidth().height(68.dp).border(1.dp, Color(0xFFFFA08A), RoundedCornerShape(24.dp)), shape=RoundedCornerShape(24.dp), colors=ButtonDefaults.buttonColors(containerColor=Color(0xFFFF321E))) {
-            Icon(Icons.Filled.Call, null, modifier=Modifier.size(28.dp)); Spacer(Modifier.width(8.dp)); Text("اورژانس ایران ۱۱۵", fontSize=21.sp, fontWeight=FontWeight.Black)
+        Button(
+            onClick={ runCatching { ctx.startActivity(Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", EmergencyDirectory.iran.emergencyNumber, null))) } },
+            modifier=Modifier.fillMaxWidth().height(66.dp).border(1.dp, Color(0xFFFFA08A), RoundedCornerShape(23.dp)),
+            shape=RoundedCornerShape(23.dp), colors=ButtonDefaults.buttonColors(containerColor=Color(0xFFFF321E))
+        ) {
+            Icon(Icons.Filled.Call, null, modifier=Modifier.size(27.dp)); Spacer(Modifier.width(8.dp))
+            Text("تماس با اورژانس ایران ۱۱۵", fontSize=19.sp, fontWeight=FontWeight.Black)
         }
-        Row(Modifier.fillMaxWidth(), verticalAlignment=Alignment.CenterVertically, horizontalArrangement=Arrangement.SpaceBetween) {
-            OutlinedButton(onClick=settings, shape=RoundedCornerShape(18.dp), border=androidx.compose.foundation.BorderStroke(1.dp, NeonCyan)) { Icon(Icons.Filled.Settings, null, tint=Color.White); Text("تنظیمات", color=Color.White) }
-            Text("آرامش، اقدام درست، نجات جان", color=Color.White, fontWeight=FontWeight.Bold, fontSize=13.sp)
-            OutlinedButton(onClick=guide, shape=RoundedCornerShape(18.dp), border=androidx.compose.foundation.BorderStroke(1.dp, NeonCyan)) { Icon(Icons.Filled.MenuBook, null, tint=Color.White); Text("راهنما", color=Color.White) }
+        Row(Modifier.fillMaxWidth(), verticalAlignment=Alignment.CenterVertically, horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(onClick=settings, modifier=Modifier.weight(1f), shape=RoundedCornerShape(18.dp), border=androidx.compose.foundation.BorderStroke(1.dp, NeonCyan)) {
+                Icon(Icons.Filled.Settings, null, tint=Color.White); Text("تنظیمات", color=Color.White, fontSize=12.sp)
+            }
+            OutlinedButton(onClick=guide, modifier=Modifier.weight(1f), shape=RoundedCornerShape(18.dp), border=androidx.compose.foundation.BorderStroke(1.dp, NeonCyan)) {
+                Icon(Icons.Filled.MenuBook, null, tint=Color.White); Text("راهنمای برنامه", color=Color.White, fontSize=12.sp)
+            }
         }
+        Text("آرامش، اقدام درست، نجات جان", color=Color.White, fontWeight=FontWeight.Bold, fontSize=13.sp, modifier=Modifier.fillMaxWidth(), textAlign=TextAlign.Center)
     }
 }
 
