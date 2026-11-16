@@ -224,12 +224,30 @@ private fun HomeV2(dark: Boolean, choose: (PatientGroup) -> Unit, guide: () -> U
             Icon(Icons.Filled.Call, null, modifier=Modifier.size(27.dp)); Spacer(Modifier.width(8.dp))
             Text("تماس با اورژانس ایران ۱۱۵", fontSize=19.sp, fontWeight=FontWeight.Black)
         }
+        // High-contrast footer actions: filled surfaces remain visible in both themes.
+        val footerActionColor = if (dark) Color(0xFF087F8C) else Color(0xFF0B4F71)
         Row(Modifier.fillMaxWidth(), verticalAlignment=Alignment.CenterVertically, horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick=settings, modifier=Modifier.weight(1f), shape=RoundedCornerShape(18.dp), border=androidx.compose.foundation.BorderStroke(1.dp, NeonCyan)) {
-                Icon(Icons.Filled.Settings, null, tint=Color.White); Text("تنظیمات", color=Color.White, fontSize=12.sp)
+            OutlinedButton(
+                onClick=settings,
+                modifier=Modifier.weight(1f).heightIn(min=52.dp),
+                shape=RoundedCornerShape(18.dp),
+                border=androidx.compose.foundation.BorderStroke(1.5.dp, if (dark) NeonCyan else Color(0xFF063B59)),
+                colors=ButtonDefaults.outlinedButtonColors(containerColor=footerActionColor, contentColor=Color.White)
+            ) {
+                Icon(Icons.Filled.Settings, null, tint=Color.White)
+                Spacer(Modifier.width(6.dp))
+                Text("تنظیمات", color=Color.White, fontSize=13.sp, fontWeight=FontWeight.Bold)
             }
-            OutlinedButton(onClick=guide, modifier=Modifier.weight(1f), shape=RoundedCornerShape(18.dp), border=androidx.compose.foundation.BorderStroke(1.dp, NeonCyan)) {
-                Icon(Icons.Filled.MenuBook, null, tint=Color.White); Text("راهنمای برنامه", color=Color.White, fontSize=12.sp)
+            OutlinedButton(
+                onClick=guide,
+                modifier=Modifier.weight(1f).heightIn(min=52.dp),
+                shape=RoundedCornerShape(18.dp),
+                border=androidx.compose.foundation.BorderStroke(1.5.dp, if (dark) NeonCyan else Color(0xFF063B59)),
+                colors=ButtonDefaults.outlinedButtonColors(containerColor=footerActionColor, contentColor=Color.White)
+            ) {
+                Icon(Icons.Filled.MenuBook, null, tint=Color.White)
+                Spacer(Modifier.width(6.dp))
+                Text("راهنمای برنامه", color=Color.White, fontSize=13.sp, fontWeight=FontWeight.Bold)
             }
         }
         Text("آرامش، اقدام درست، نجات جان", color=Color.White, fontWeight=FontWeight.Bold, fontSize=13.sp, modifier=Modifier.fillMaxWidth(), textAlign=TextAlign.Center)
