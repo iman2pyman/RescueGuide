@@ -83,7 +83,8 @@ fun RescueGuideRootV2(billing: BazaarBillingManager) {
                 { flow = SessionFlowReducer.reduce(flow, SessionFlowAction.Back) },
                 { type, count -> flow = SessionFlowReducer.reduce(flow, SessionFlowAction.ChooseRescuer(type, count)) },
                 { flow = SessionStateHome() })
-            else -> ActiveV2(flow.selection!!, flow.activeStepIndex, dark,
+            else -> ActiveV2(flow.selection!!, flow.activeStepIndex, dark, premiumEnabled,
+                { activity?.let { billing.purchase(it.activityResultRegistry) } },
                 { flow = SessionFlowReducer.reduce(flow, SessionFlowAction.PreviousStep) },
                 {
                     val s = flow.selection!!
@@ -323,7 +324,7 @@ private fun RescuerTileV2(title: String, tint: Color, icon: androidx.compose.ui.
 }
 
 @Composable
-private fun ActiveV2(s: SessionSelection, stepIndex: Int, dark: Boolean, previous: () -> Unit, next: () -> Unit, exit: () -> Unit, rosc: () -> Unit, home: () -> Unit) {
+private fun ActiveV2(s: SessionSelection, stepIndex: Int, dark: Boolean, premiumEnabled: Boolean, onPurchase: () -> Unit, previous: () -> Unit, next: () -> Unit, exit: () -> Unit, rosc: () -> Unit, home: () -> Unit) {
     val ctx = LocalContext.current
     val audio = remember(ctx) { OfflinePersianAudioPlayer(ctx) }
     val scope = rememberCoroutineScope()
@@ -339,6 +340,15 @@ private fun ActiveV2(s: SessionSelection, stepIndex: Int, dark: Boolean, previou
     val sub = if (dark) Color(0xFFD6E7FF) else Color(0xFF31577D)
     val lifecycle = LocalLifecycleOwner.current
     var autoAdvance by remember { mutableStateOf<Job?>(null) }
+    var showStageFourOffer by remember(s) { mutableStateOf(false) }
+    var stageFourOfferShown by remember(s) { mutableStateOf(false) }
+    LaunchedEffect(index, premiumEnabled) {
+        if (index >= 3 && !premiumEnabled && !stageFourOfferShown) {
+            showStageFourOffer = true
+            stageFourOfferShown = true
+        }
+        if (premiumEnabled) showStageFourOffer = false
+    }
     fun speakCurrentStep() {
         audio.stop()
         autoAdvance?.cancel()
@@ -413,6 +423,27 @@ private fun ActiveV2(s: SessionSelection, stepIndex: Int, dark: Boolean, previou
             Button(onClick = { audio.stop(); next() }, modifier = Modifier.fillMaxWidth()) { Text("دستگاه AED / مرحله بعد آماده است") }
         }
         if (index == steps.lastIndex) Text("مراحل صوتی پایان یافت؛ احیا را تا رسیدن کمک ادامه دهید.", color = fg)
+        if (showStageFourOffer && !premiumEnabled) {
+            Card(
+                Modifier.fillMaxWidth().border(1.dp, Color(0xFFFFC857), RoundedCornerShape(20.dp)),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF17365D))
+            ) {
+                Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("دسترسی تکمیلی RescueGuide", color = Color(0xFFFFD778), fontWeight = FontWeight.Black, fontSize = 16.sp)
+                    Text(
+                        "برای بازکردن محتوای آموزشی تکمیلی و امکانات غیرضروری، دسترسی دائمی را یک‌بار خریداری کنید. مراحل ضروری احیا، ادامه CPR و تماس با ۱۱۵ همیشه رایگان می‌مانند.",
+                        color = Color.White, fontSize = 13.sp, lineHeight = 20.sp
+                    )
+                    Button(onClick = onPurchase, modifier = Modifier.fillMaxWidth()) {
+                        Text("خرید دسترسی کامل از کافه‌بازار")
+                    }
+                    TextButton(onClick = { showStageFourOffer = false }, modifier = Modifier.fillMaxWidth()) {
+                        Text("ادامه راهنمای ضروری رایگان", color = Color(0xFF8FE9E4))
+                    }
+                }
+            }
+        }
         Button(onClick = { autoAdvance?.cancel(); audio.stop(); rosc() }, modifier = Modifier.fillMaxWidth().height(66.dp).border(1.dp, Color(0xFFFFB59E), RoundedCornerShape(23.dp)), shape=RoundedCornerShape(23.dp), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF321E))) {
             Text("علائم حیاتی برگشت", fontSize = 19.sp, fontWeight = FontWeight.Black)
         }
