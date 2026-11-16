@@ -224,30 +224,32 @@ private fun HomeV2(dark: Boolean, choose: (PatientGroup) -> Unit, guide: () -> U
             Icon(Icons.Filled.Call, null, modifier=Modifier.size(27.dp)); Spacer(Modifier.width(8.dp))
             Text("تماس با اورژانس ایران ۱۱۵", fontSize=19.sp, fontWeight=FontWeight.Black)
         }
-        // High-contrast footer actions: filled surfaces remain visible in both themes.
-        val footerActionColor = if (dark) Color(0xFF087F8C) else Color(0xFF0B4F71)
-        Row(Modifier.fillMaxWidth(), verticalAlignment=Alignment.CenterVertically, horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+        // High-contrast footer actions: gold/navy in day mode, vivid teal in night mode.
+        val footerActionColor = if (dark) Color(0xFF087F8C) else Color(0xFFFFD54A)
+        val footerContentColor = if (dark) Color.White else Color(0xFF08264F)
+        val footerBorderColor = if (dark) NeonCyan else Color(0xFF073B78)
+        Row(Modifier.fillMaxWidth(), verticalAlignment=Alignment.CenterVertically, horizontalArrangement=Arrangement.spacedBy(10.dp)) {
             OutlinedButton(
                 onClick=settings,
-                modifier=Modifier.weight(1f).heightIn(min=52.dp),
+                modifier=Modifier.weight(1f).heightIn(min=58.dp),
                 shape=RoundedCornerShape(18.dp),
-                border=androidx.compose.foundation.BorderStroke(1.5.dp, if (dark) NeonCyan else Color(0xFF063B59)),
-                colors=ButtonDefaults.outlinedButtonColors(containerColor=footerActionColor, contentColor=Color.White)
+                border=androidx.compose.foundation.BorderStroke(2.dp, footerBorderColor),
+                colors=ButtonDefaults.outlinedButtonColors(containerColor=footerActionColor, contentColor=footerContentColor)
             ) {
-                Icon(Icons.Filled.Settings, null, tint=Color.White)
-                Spacer(Modifier.width(6.dp))
-                Text("تنظیمات", color=Color.White, fontSize=13.sp, fontWeight=FontWeight.Bold)
+                Icon(Icons.Filled.Settings, null, tint=footerContentColor, modifier=Modifier.size(21.dp))
+                Spacer(Modifier.width(7.dp))
+                Text("تنظیمات", color=footerContentColor, fontSize=14.sp, fontWeight=FontWeight.Black)
             }
             OutlinedButton(
                 onClick=guide,
-                modifier=Modifier.weight(1f).heightIn(min=52.dp),
+                modifier=Modifier.weight(1f).heightIn(min=58.dp),
                 shape=RoundedCornerShape(18.dp),
-                border=androidx.compose.foundation.BorderStroke(1.5.dp, if (dark) NeonCyan else Color(0xFF063B59)),
-                colors=ButtonDefaults.outlinedButtonColors(containerColor=footerActionColor, contentColor=Color.White)
+                border=androidx.compose.foundation.BorderStroke(2.dp, footerBorderColor),
+                colors=ButtonDefaults.outlinedButtonColors(containerColor=footerActionColor, contentColor=footerContentColor)
             ) {
-                Icon(Icons.Filled.MenuBook, null, tint=Color.White)
-                Spacer(Modifier.width(6.dp))
-                Text("راهنمای برنامه", color=Color.White, fontSize=13.sp, fontWeight=FontWeight.Bold)
+                Icon(Icons.Filled.MenuBook, null, tint=footerContentColor, modifier=Modifier.size(21.dp))
+                Spacer(Modifier.width(7.dp))
+                Text("راهنمای برنامه", color=footerContentColor, fontSize=14.sp, fontWeight=FontWeight.Black)
             }
         }
         Text("آرامش، اقدام درست، نجات جان", color=Color.White, fontWeight=FontWeight.Bold, fontSize=13.sp, modifier=Modifier.fillMaxWidth(), textAlign=TextAlign.Center)
