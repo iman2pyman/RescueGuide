@@ -1,37 +1,20 @@
-# RescueGuide 0.34.0-dev — وضعیت پروژه
+# RescueGuide 0.37.0-dev — وضعیت پروژه
 
-## تغییرات پیاده‌سازی‌شده
-- صفحه آغازین با انتخاب مستقل بزرگسال، کودک و شیرخوار.
-- صفحه دوم فقط دو انتخاب دارد: «امدادگر آموزش‌دیده» و «فرد عادی».
-- راهنمای صوتی مراحل به‌صورت خودکار پخش می‌شود و پس از پایان هر صوت به مرحله بعد می‌رود؛ برای پیشروی، تأیید گفتاری «بله» لازم نیست و اقدامات حیاتی منتظر تأیید نمی‌مانند.
-- دکمه‌های «مرحله قبل» و «تکرار توضیح فعلی» در صفحه فعال.
-- دکمه بزرگ «علائم حیاتی برگشت» و صفحه مستقل شش‌مرحله‌ای مراقبت پس از ROSC، بدون صوت.
-- تنظیمات ذخیره‌شونده تم شب/روز، راهنمای برنامه و معرفی سازنده.
-- تصاویر آموزشی آفلاین و بزرگ‌نمایی‌پذیر؛ فهرست ۱۵ تصویر و انتساب سازندگان/مجوزها در `docs/IMAGE_ASSET_LICENSES.md`.
-- ۳۴ فایل MP3 فارسی از نسخه مرجع 0.33.1 حفظ شده‌اند.
-- آیکن اختصاصی و مسیر تماس با شماره‌گیر ۱۱۵ حفظ شده‌اند.
-- احیای پیشرفته در محدوده این نسخه نیست.
+## این بازبینی چه چیزی را تغییر می‌دهد؟
+- رابط صفحه اول از کارت‌های ساده قبلی به چیدمان نزدیک به موکاپ تأییدشده سه‌گوشی بازطراحی شد: نشان قلب/ECG، پنل موج صوتی، کارت‌های گرادیانی گروه‌های سنی و دکمه برجسته قرمز اورژانس ۱۱۵.
+- صفحه انتخاب امدادگر با کارت‌های بزرگ گرادیانی فیروزه‌ای/آبی/بنفش و دکمه ثابت صفحه اول بازطراحی شد.
+- پس‌زمینه نقطه‌ای سرمه‌ای و خط ECG به صفحات احیا، راهنما و مراقبت پس از ROSC افزوده شد؛ کارت‌های آموزشی و کنترل‌ها نیز به پالت تیره/فیروزه‌ای تغییر کردند.
+- آیکن لانچر به نشان قلب دو‌رنگ قرمز/فیروزه‌ای با خط ECG تغییر کرد.
 
-## راستی‌آزمایی ساخت
-- نسخه Gradle در `app/build.gradle.kts`: 0.34.0-dev، versionCode 35.
-- GitHub Actions، اجرای CI شماره 50 (run ID: 43754853959) برای commit کد `c3fec71072f3ee3c94f7aa0fdde011f515cc6717`: اعتبارسنجی Gradle، unit tests، Android lint و assembleDebug همگی موفق.
-- APK خروجی حدود 26.6 MB است؛ ۷ فایل DEX، آیکن لانچر و ۱۹ تصویر drawable-nodpi در آن دیده شدند.
-- هر ۳۴ فایل MP3 داخل APK با همان نام و محتوای باینری با ۳۴ فایل موجود در سورس مرجع 0.33.1 تطبیق داده شدند.
-- commit بعدی `0fde49740d3c8f3f6a3c5384aaad6adcb9814453` یک تصویر مجازِ بررسی تنفس را به شاخه main افزود؛ همان تصویر در APK ساخته‌شده توسط مرحله دریافت خودکار تصاویر CI نیز موجود است.
-- نصب و اجرای APK روی گوشی واقعی در این بررسی انجام نشده است؛ خروجی فعلی debug است، نه بسته انتشار امضاشده.
+## موارد حفظ‌شده
+- مسیرهای BLS بزرگسال، کودک و شیرخوار؛ مسیر پیشرفته و خفگی در این نسخه غیرفعال.
+- نسبت ۳۰:۲ برای بزرگسال و امدادگر تنها؛ ۱۵:۲ برای دو امدادگر آموزش‌دیده کودک/شیرخوار.
+- شمارشگر حدود ۱۱۰ فشار در دقیقه، دو نشانه صوتی زمان‌بندی تنفس، کنترل تکرار/مرحله قبل، صفحه شش‌مرحله‌ای پس از بازگشت علائم حیاتی.
+- ۳۴ فایل صوتی فارسی و فایل‌های تصویری قبلی بدون بازتولید یا تغییر باینری حفظ شده‌اند.
+- تماس ۱۱۵ فقط شماره‌گیر را باز می‌کند.
 
-## محدودیت‌های مجوز تصاویر
-دو تصویر فشار شیرخوار از ANZCOR با مجوز CC BY-NC 4.0 هستند؛ استفاده تجاری از آن‌ها مجاز نیست مگر مجوز جداگانه دریافت شود یا تصاویر جایگزین شوند. سایر مجوزها و انتساب‌ها در فایل مجوز تصاویر ثبت شده‌اند.
-
-## تأیید پزشکی
-محتوای پزشکی باید پیش از انتشار عمومی توسط متخصص مسئول با راهنماهای رسمی AHA/AAP 2025 تطبیق داده و تأیید شود. موفقیت ساخت نرم‌افزار به معنی تأیید پزشکی یا اثبات ایمنی بالینی نیست.
-
-
-## 0.36.0-dev — theme and CPR counter implementation implementation candidate
-- Reworked the shared dark/light palette toward the approved navy/teal/blue-violet visual direction.
-- Added a persistent home shortcut on the guide, rescuer-selection, active CPR, and post-ROSC screens.
-- Expanded the guide screen with usage instructions and BLS study summaries for adults, children, and infants.
-- Added trained-rescuer count selection for pediatric pathways; one rescuer uses 30:2 and two trained rescuers use 15:2. Adult path remains 30:2.
-- Added a visual and audible compression counter (100–120/min target) that starts on the compressions step, followed by two ventilation cues when rescue breaths are enabled. The cue is a timing prompt, not a ventilator or bag-mask simulator.
-- Updated the explanatory AED text while leaving all existing Persian voice assets unchanged.
-- Build and device validation are still required before this implementation candidate can be treated as a release.
+## نسخه و کنترل کیفیت
+- versionName: 0.37.0-dev؛ versionCode: 38.
+- اعتبارسنجی صوت‌ها با `python tools/verify_audio_assets.py` انجام شود.
+- ساخت Android/Gradle و نصب روی گوشی باید بعد از این تغییرات دوباره اجرا شود؛ تا پیش از آن APK تأییدشده محسوب نمی‌شود.
+- تأیید نهایی محتوای پزشکی و تصاویر با متخصص مسئول لازم است.

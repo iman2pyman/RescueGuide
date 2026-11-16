@@ -7,6 +7,10 @@ import android.media.ToneGenerator
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -103,79 +107,132 @@ fun RescueGuideRootV2() {
     }
 }
 
+private val NavyTop = Color(0xFF03132F)
+private val NavyBottom = Color(0xFF062A5A)
+private val NeonCyan = Color(0xFF16D9F3)
+private val NeonTeal = Color(0xFF00D8B0)
+private val RoyalBlue = Color(0xFF087FE8)
+private val Violet = Color(0xFF8D32D7)
+
+private fun Modifier.medicalBackdrop(dark: Boolean = true): Modifier = this
+    .background(Brush.verticalGradient(if (dark) listOf(NavyTop, Color(0xFF05234D), NavyBottom) else listOf(Color(0xFFEAF3FF), Color(0xFFD9EAF8), Color(0xFFF7FAFF))))
+    .drawBehind {
+        // Subtle dotted medical-tech texture, matching the approved three-phone mockup.
+        val spacing = 13.dp.toPx()
+        for (x in 0..(size.width / spacing).toInt()) {
+            for (y in 0..(size.height / spacing).toInt()) {
+                val px = x * spacing
+                val py = y * spacing
+                if ((x + y) % 3 != 0 && (px < size.width * .30f || py > size.height * .82f)) {
+                    drawCircle((if (dark) Color(0xFF1686C8) else Color(0xFF4C91B8)).copy(alpha = .16f), radius = 1.15.dp.toPx(), center = androidx.compose.ui.geometry.Offset(px, py))
+                }
+            }
+        }
+        val path = Path().apply {
+            moveTo(0f, size.height * .91f)
+            lineTo(size.width * .18f, size.height * .91f)
+            lineTo(size.width * .205f, size.height * .885f)
+            lineTo(size.width * .22f, size.height * .94f)
+            lineTo(size.width * .245f, size.height * .84f)
+            lineTo(size.width * .265f, size.height * .91f)
+            lineTo(size.width * .31f, size.height * .91f)
+            lineTo(size.width, size.height * .91f)
+        }
+        drawPath(path, (if (dark) NeonCyan else Color(0xFF0B9EAC)).copy(alpha = .42f), style = Stroke(width = 2.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round))
+    }
+
+@Composable
+private fun BrandHomeButton(onClick: () -> Unit) {
+    OutlinedButton(onClick = onClick, shape = RoundedCornerShape(18.dp), border = androidx.compose.foundation.BorderStroke(1.dp, NeonCyan.copy(alpha=.85f))) {
+        Icon(Icons.Filled.Home, null, tint = Color.White)
+        Spacer(Modifier.width(6.dp))
+        Text("صفحه اول", color = Color.White, fontWeight = FontWeight.Bold)
+    }
+}
+
+@Composable
+private fun VoiceWavePanel(text: String, icon: androidx.compose.ui.graphics.vector.ImageVector = Icons.Filled.MonitorHeart) {
+    Card(Modifier.fillMaxWidth().border(1.5.dp, NeonCyan, RoundedCornerShape(24.dp)), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFF07386B))) {
+        Row(Modifier.fillMaxWidth().padding(horizontal=16.dp, vertical=13.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Icon(icon, null, tint = Color.White, modifier = Modifier.size(30.dp))
+            Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("〰 ııııııııııııııııııııı 〰", color = NeonCyan, fontSize = 20.sp, fontWeight = FontWeight.Black)
+                Text(text, color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+            }
+        }
+    }
+}
+
 @Composable
 private fun HomeV2(dark: Boolean, choose: (PatientGroup) -> Unit, guide: () -> Unit, settings: () -> Unit) {
     val ctx = LocalContext.current
     val audio = remember(ctx) { OfflinePersianAudioPlayer(ctx) }
-    val fg = if (dark) Color.White else Color(0xFF10264A)
-    val bg = if (dark) listOf(Color(0xFF031943), Color(0xFF062B68)) else listOf(Color(0xFFEAF3FF), Color(0xFFF7FAFF))
     DisposableEffect(audio) { onDispose { audio.release() } }
     LaunchedEffect(Unit) { audio.play("سلام، من رابط صوتی احیا هستم. آرامش خود را حفظ کنید. در شرایط اضطراری با ۱۱۵ تماس بگیرید.") }
-    Column(Modifier.fillMaxSize().background(Brush.verticalGradient(bg)).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(13.dp)) {
-        Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(28.dp), colors = CardDefaults.cardColors(containerColor = if (dark) Color(0xFF102D55) else Color(0xFF0B5678))) {
-            Column(Modifier.fillMaxWidth().background(Brush.horizontalGradient(listOf(Color(0xFF0B4775), Color(0xFF176B9B), Color(0xFF2856A8)))).padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(Icons.Filled.MonitorHeart, null, tint = Color(0xFF5EF0E4), modifier = Modifier.size(48.dp))
-                Text("RescueGuide", color = Color.White, fontSize = 29.sp, fontWeight = FontWeight.Black)
-                Text("دستیار صوتی هوشمند احیای اضطراری", color = Color.White, fontWeight = FontWeight.Bold)
-                Text("ایران • اورژانس ۱۱۵", color = Color(0xFFB9F4F0), fontSize = 13.sp)
+    val fg = Color.White
+    Column(Modifier.fillMaxSize().medicalBackdrop(dark).verticalScroll(rememberScrollState()).padding(horizontal=16.dp, vertical=12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.fillMaxWidth().padding(top=5.dp), horizontalAlignment=Alignment.CenterHorizontally) {
+            Box(Modifier.size(82.dp), contentAlignment=Alignment.Center) {
+                Icon(Icons.Filled.Favorite, null, tint=Color(0xFF10D9EF), modifier=Modifier.size(76.dp))
+                Icon(Icons.Filled.MonitorHeart, null, tint=Color.White, modifier=Modifier.size(43.dp))
             }
+            Text("RescueGuide", color=Color.White, fontSize=31.sp, fontWeight=FontWeight.Black)
+            Text("راهنمای هوشمند احیای پایه", color=Color.White, fontSize=15.sp, fontWeight=FontWeight.Bold)
         }
-        Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(22.dp), colors = CardDefaults.cardColors(containerColor = if (dark) Color(0xFF17365D) else Color.White)) {
-            Column(Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("گروه سنی بیمار را انتخاب کنید", color = if (dark) Color(0xFF6DE7E0) else Color(0xFF0756C8), fontSize = 18.sp, fontWeight = FontWeight.Black)
-                Text("پس از انتخاب امدادگر، راهنمای صوتی و شمارشگر CPR فعال می‌شود.", color = fg, textAlign = TextAlign.Center)
-            }
+        VoiceWavePanel("سلام، من راهنمای صوتی احیا هستم")
+        Text("گروه سنی بیمار را انتخاب کنید", color=Color.White, fontSize=18.sp, fontWeight=FontWeight.Black, modifier=Modifier.fillMaxWidth(), textAlign=TextAlign.Center)
+        PatientTileV2("بزرگسال", "راهنمای احیای پایه بزرگسال", Color(0xFF087FE8)) { choose(PatientGroup.ADULT) }
+        PatientTileV2("کودک", "از یک سال تا شروع بلوغ", Color(0xFF078FCB)) { choose(PatientGroup.CHILD) }
+        PatientTileV2("شیرخوار", "زیر یک سال", Color(0xFF8437D1)) { choose(PatientGroup.INFANT) }
+        Button(onClick = { runCatching { ctx.startActivity(Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", EmergencyDirectory.iran.emergencyNumber, null))) } }, modifier=Modifier.fillMaxWidth().height(68.dp).border(1.dp, Color(0xFFFFA08A), RoundedCornerShape(24.dp)), shape=RoundedCornerShape(24.dp), colors=ButtonDefaults.buttonColors(containerColor=Color(0xFFFF321E))) {
+            Icon(Icons.Filled.Call, null, modifier=Modifier.size(28.dp)); Spacer(Modifier.width(8.dp)); Text("اورژانس ایران ۱۱۵", fontSize=21.sp, fontWeight=FontWeight.Black)
         }
-        PatientTileV2("بزرگسال", "راهنمای احیای پایه بزرگسال", Color(0xFF167BFF)) { choose(PatientGroup.ADULT) }
-        PatientTileV2("کودک", "از یک سال تا شروع بلوغ", Color(0xFF159B59)) { choose(PatientGroup.CHILD) }
-        PatientTileV2("شیرخوار", "زیر یک سال", Color(0xFF0097A7)) { choose(PatientGroup.INFANT) }
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = guide, modifier = Modifier.weight(1f)) { Icon(Icons.Filled.MenuBook, null); Text("راهنما") }
-            OutlinedButton(onClick = settings, modifier = Modifier.weight(1f)) { Icon(Icons.Filled.Settings, null); Text("تنظیمات") }
+        Row(Modifier.fillMaxWidth(), verticalAlignment=Alignment.CenterVertically, horizontalArrangement=Arrangement.SpaceBetween) {
+            OutlinedButton(onClick=settings, shape=RoundedCornerShape(18.dp), border=androidx.compose.foundation.BorderStroke(1.dp, NeonCyan)) { Icon(Icons.Filled.Settings, null, tint=Color.White); Text("تنظیمات", color=Color.White) }
+            Text("آرامش، اقدام درست، نجات جان", color=Color.White, fontWeight=FontWeight.Bold, fontSize=13.sp)
+            OutlinedButton(onClick=guide, shape=RoundedCornerShape(18.dp), border=androidx.compose.foundation.BorderStroke(1.dp, NeonCyan)) { Icon(Icons.Filled.MenuBook, null, tint=Color.White); Text("راهنما", color=Color.White) }
         }
-        Button(onClick = { runCatching { ctx.startActivity(Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", EmergencyDirectory.iran.emergencyNumber, null))) } }, modifier = Modifier.fillMaxWidth().height(58.dp), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFCF2036))) {
-            Icon(Icons.Filled.Call, null); Text("تماس با اورژانس ۱۱۵", fontSize = 18.sp, fontWeight = FontWeight.Black)
-        }
-        Text("نسخه آزمایشی • راهنمای احیای پایه", color = fg, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
     }
 }
 
 @Composable
 private fun PatientTileV2(title: String, subtitle: String, tint: Color, click: () -> Unit) {
-    Card(Modifier.fillMaxWidth().height(92.dp).clickable(onClick = click).border(1.dp, Color.White.copy(alpha = 0.35f), RoundedCornerShape(22.dp)), shape = RoundedCornerShape(22.dp), colors = CardDefaults.cardColors(containerColor = tint)) {
-        Row(Modifier.fillMaxSize().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Filled.Favorite, null, tint = Color.White, modifier = Modifier.size(32.dp))
-            Spacer(Modifier.width(12.dp))
-            Column(Modifier.weight(1f)) { Text(title, color = Color.White, fontSize = 19.sp, fontWeight = FontWeight.Black); Text(subtitle, color = Color.White, fontSize = 12.sp) }
-            Text("›", color = Color.White, fontSize = 32.sp)
+    val gradient = when (title) {
+        "بزرگسال" -> listOf(Color(0xFF02C9B4), Color(0xFF087F9F))
+        "کودک" -> listOf(Color(0xFF20B9FF), Color(0xFF0872D8))
+        else -> listOf(Color(0xFFB344F4), Color(0xFF7621C8))
+    }
+    Card(Modifier.fillMaxWidth().height(94.dp).clickable(onClick=click).border(1.2.dp, Color.White.copy(alpha=.65f), RoundedCornerShape(25.dp)), shape=RoundedCornerShape(25.dp), colors=CardDefaults.cardColors(containerColor=tint)) {
+        Row(Modifier.fillMaxSize().background(Brush.horizontalGradient(gradient)).padding(horizontal=20.dp), verticalAlignment=Alignment.CenterVertically) {
+            Icon(Icons.Filled.Favorite, null, tint=Color.White, modifier=Modifier.size(38.dp))
+            Spacer(Modifier.width(18.dp))
+            Column(Modifier.weight(1f)) { Text(title, color=Color.White, fontSize=23.sp, fontWeight=FontWeight.Black); Text(subtitle, color=Color.White.copy(alpha=.92f), fontSize=12.sp) }
+            Text("‹", color=Color.White, fontSize=36.sp, fontWeight=FontWeight.Bold)
         }
     }
 }
 
 @Composable
 private fun RescuerV2(group: PatientGroup, dark: Boolean, back: () -> Unit, choose: (RescuerType, Int) -> Unit, home: () -> Unit) {
-    val fg = if (dark) Color.White else Color(0xFF10264A)
-    val bg = if (dark) listOf(Color(0xFF031943), Color(0xFF062B68)) else listOf(Color(0xFFEAF3FF), Color(0xFFF7FAFF))
-    Column(Modifier.fillMaxSize().background(Brush.verticalGradient(bg)).padding(20.dp), verticalArrangement = Arrangement.spacedBy(18.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            OutlinedButton(onClick = back) { Text("بازگشت") }
-            TextButton(onClick = home) { Icon(Icons.Filled.Home, null); Text("صفحه اول") }
-        }
-        Text("نوع امدادگر را انتخاب کنید", color = fg, fontSize = 23.sp, fontWeight = FontWeight.Black)
-        Text("گروه سنی: " + PatientRouting.label(group), color = fg)
-        Text("تعداد امدادگران آموزش‌دیده حاضر را مشخص کنید:", color = fg, fontWeight = FontWeight.Bold)
-        RescuerTileV2("یک امدادگر آموزش‌دیده", Color(0xFF0877D5), Icons.Filled.MonitorHeart) { choose(RescuerType.TRAINED_RESCUER, 1) }
-        if (group != PatientGroup.ADULT) RescuerTileV2("دو امدادگر آموزش‌دیده", Color(0xFF6656C8), Icons.Filled.MonitorHeart) { choose(RescuerType.TRAINED_RESCUER, 2) }
-        RescuerTileV2("فرد عادی / بدون آموزش تخصصی", Color(0xFF159B59), Icons.Filled.Favorite) { choose(RescuerType.LAY_RESCUER, 1) }
+    Column(Modifier.fillMaxSize().medicalBackdrop(dark).verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement=Arrangement.spacedBy(18.dp), horizontalAlignment=Alignment.CenterHorizontally) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement=Arrangement.Start) { BrandHomeButton(home); Spacer(Modifier.weight(1f)); TextButton(onClick=back) { Text("بازگشت", color=Color.White) } }
+        Text("نوع امدادگر را انتخاب کنید", color=Color.White, fontSize=23.sp, fontWeight=FontWeight.Black, textAlign=TextAlign.Center)
+        Text("گروه سنی: ${PatientRouting.label(group)}", color=Color(0xFFBCEFFF), fontSize=15.sp, fontWeight=FontWeight.Bold)
+        RescuerTileV2("امدادگر آموزش‌دیده", Color(0xFF08BBAE), Icons.Filled.MonitorHeart) { choose(RescuerType.TRAINED_RESCUER, 1) }
+        if (group != PatientGroup.ADULT) RescuerTileV2("دو امدادگر آموزش‌دیده", Color(0xFF087FE8), Icons.Filled.MonitorHeart) { choose(RescuerType.TRAINED_RESCUER, 2) }
+        RescuerTileV2("فرد عادی", Color(0xFF7135C5), Icons.Filled.Favorite) { choose(RescuerType.LAY_RESCUER, 1) }
+        Text("در صورت حضور دو امدادگر آموزش‌دیده، گزینه مربوط را انتخاب کنید.", color=Color.White, fontSize=12.sp, textAlign=TextAlign.Center)
     }
 }
 
 @Composable
 private fun RescuerTileV2(title: String, tint: Color, icon: androidx.compose.ui.graphics.vector.ImageVector, click: () -> Unit) {
-    Card(Modifier.fillMaxWidth().height(150.dp).clickable(onClick = click), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = tint)) {
-        Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-            Icon(icon, null, tint = Color.White, modifier = Modifier.size(40.dp))
-            Text(title, color = Color.White, fontSize = 21.sp, fontWeight = FontWeight.Black)
+    Card(Modifier.fillMaxWidth().height(170.dp).clickable(onClick=click).border(1.2.dp, NeonCyan.copy(alpha=.8f), RoundedCornerShape(26.dp)), shape=RoundedCornerShape(26.dp), colors=CardDefaults.cardColors(containerColor=tint)) {
+        Row(Modifier.fillMaxSize().background(Brush.horizontalGradient(listOf(tint, tint.copy(alpha=.72f), Color(0xFF07517C)))).padding(22.dp), verticalAlignment=Alignment.CenterVertically) {
+            Icon(icon, null, tint=Color.White, modifier=Modifier.size(54.dp))
+            Spacer(Modifier.width(18.dp))
+            Text(title, color=Color.White, fontSize=22.sp, fontWeight=FontWeight.Black, modifier=Modifier.weight(1f))
+            Text("‹", color=Color.White, fontSize=34.sp)
         }
     }
 }
@@ -241,27 +298,27 @@ private fun ActiveV2(s: SessionSelection, stepIndex: Int, dark: Boolean, previou
         lifecycle.lifecycle.addObserver(observer)
         onDispose { autoAdvance?.cancel(); lifecycle.lifecycle.removeObserver(observer); audio.release() }
     }
-    Column(Modifier.fillMaxSize().background(Brush.verticalGradient(if (dark) listOf(Color(0xFF031943), Color(0xFF062B68)) else listOf(Color(0xFFEAF3FF), Color(0xFFF7FAFF))))
+    Column(Modifier.fillMaxSize().medicalBackdrop(dark)
         .verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            Text("مرحله " + (index + 1) + " از " + steps.size, color = fg)
-            TextButton(onClick = { autoAdvance?.cancel(); audio.stop(); exit(); home() }) { Icon(Icons.Filled.Home, null); Text("صفحه اول") }
+            Text("مرحله " + (index + 1) + " از " + steps.size, color = Color.White, fontWeight=FontWeight.Bold)
+            BrandHomeButton { autoAdvance?.cancel(); audio.stop(); exit(); home() }
         }
-        Text("راهنمای احیای پایه", color = fg, fontSize = 22.sp, fontWeight = FontWeight.Black)
-        Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+        Text("راهنمای احیای پایه", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Black)
+        Card(Modifier.fillMaxWidth().border(1.dp, NeonCyan.copy(alpha=.75f), RoundedCornerShape(22.dp)), shape=RoundedCornerShape(22.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFF0B315C))) {
             Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text(step.title, color = Color(0xFF073A91), fontSize = 19.sp, fontWeight = FontWeight.Black)
-                Text(step.instruction, color = Color(0xFF142C4E), fontSize = 15.sp, lineHeight = 23.sp)
-                if (step.id == "ratio" && s.patientGroup != PatientGroup.ADULT) Text("اگر قادر به تنفس کمکی نیستید، فشارهای پیوسته را ادامه دهید.", color = Color(0xFFB3261E), fontWeight = FontWeight.Bold)
-                if (step.timeCritical) Text("اقدام فوری — برای تأیید منتظر نمانید.", color = Color(0xFFB3261E), fontWeight = FontWeight.Bold)
+                Text(step.title, color = Color(0xFF65E9F0), fontSize = 19.sp, fontWeight = FontWeight.Black)
+                Text(step.instruction, color = Color.White, fontSize = 15.sp, lineHeight = 23.sp)
+                if (step.id == "ratio" && s.patientGroup != PatientGroup.ADULT) Text("اگر قادر به تنفس کمکی نیستید، فشارهای پیوسته را ادامه دهید.", color = Color(0xFFFFB5A8), fontWeight = FontWeight.Bold)
+                if (step.timeCritical) Text("اقدام فوری — برای تأیید منتظر نمانید.", color = Color(0xFFFFB5A8), fontWeight = FontWeight.Bold)
             }
         }
         StepVisualV2(s.patientGroup!!, step.id)
         if (step.id == "compressions") {
-            Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = if (dark) Color(0xFF123D62) else Color(0xFFE2F6F6))) {
+            Card(Modifier.fillMaxWidth().border(1.dp, NeonCyan, RoundedCornerShape(24.dp)), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFF073A6B))) {
                 Column(Modifier.fillMaxWidth().padding(18.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(7.dp)) {
-                    Text("شمارشگر خودکار ماساژ قلبی", color = if (dark) Color.White else Color(0xFF073A55), fontWeight = FontWeight.Black)
-                    Text(if (ventilationCue > 0) "تنفس کمکی ${if (ventilationCue == 1) "اول" else "دوم"}" else "$compressionCount / $compressionTarget", color = if (dark) Color(0xFF5CF0E4) else Color(0xFF087F8C), fontSize = 38.sp, fontWeight = FontWeight.Black)
+                    Text("شمارشگر خودکار ماساژ قلبی", color = Color.White, fontWeight = FontWeight.Black)
+                    Text(if (ventilationCue > 0) "تنفس کمکی ${if (ventilationCue == 1) "اول" else "دوم"}" else "$compressionCount / $compressionTarget", color = NeonCyan, fontSize = 38.sp, fontWeight = FontWeight.Black)
                     Text(if (ventilationCue > 0) "اکنون تنفس را بدهید؛ هر تنفس حدود یک ثانیه و فقط تا بالا آمدن قفسه سینه." else "ریتم هدف: ۱۰۰ تا ۱۲۰ فشار در دقیقه", color = fg, textAlign = TextAlign.Center, fontSize = 12.sp)
                     Text(if (hasBreaths) "نسبت این مسیر: $compressionTarget فشار به ۲ تنفس" else "فشارهای پیوسته؛ بدون توقف برای تنفس", color = fg, fontWeight = FontWeight.Bold)
                 }
@@ -271,12 +328,12 @@ private fun ActiveV2(s: SessionSelection, stepIndex: Int, dark: Boolean, previou
             Button(onClick = { audio.stop(); next() }, modifier = Modifier.fillMaxWidth()) { Text("دستگاه AED / مرحله بعد آماده است") }
         }
         if (index == steps.lastIndex) Text("مراحل صوتی پایان یافت؛ احیا را تا رسیدن کمک ادامه دهید.", color = fg)
-        Button(onClick = { autoAdvance?.cancel(); audio.stop(); rosc() }, modifier = Modifier.fillMaxWidth().height(62.dp), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF159B59))) {
+        Button(onClick = { autoAdvance?.cancel(); audio.stop(); rosc() }, modifier = Modifier.fillMaxWidth().height(66.dp).border(1.dp, Color(0xFFFFB59E), RoundedCornerShape(23.dp)), shape=RoundedCornerShape(23.dp), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF321E))) {
             Text("علائم حیاتی برگشت", fontSize = 19.sp, fontWeight = FontWeight.Black)
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = { autoAdvance?.cancel(); audio.stop(); previous() }, enabled = index > 0, modifier = Modifier.weight(1f)) { Text("مرحله قبل") }
-            Button(onClick = { speakCurrentStep() }, modifier = Modifier.weight(1f)) { Text("تکرار توضیح فعلی") }
+            Button(onClick = { autoAdvance?.cancel(); audio.stop(); previous() }, enabled = index > 0, modifier = Modifier.weight(1f).height(54.dp), shape=RoundedCornerShape(18.dp), colors=ButtonDefaults.buttonColors(containerColor=Color(0xFF075EB5))) { Text("مرحله قبل", fontWeight=FontWeight.Bold) }
+            Button(onClick = { speakCurrentStep() }, modifier = Modifier.weight(1f).height(54.dp), shape=RoundedCornerShape(18.dp), colors=ButtonDefaults.buttonColors(containerColor=Color(0xFF087BC5))) { Text("تکرار توضیح فعلی", fontWeight=FontWeight.Bold) }
         }
         Text("راهنمای صوتی خودکار پیش می‌رود؛ برای اقدامات حیاتی منتظر تأیید نمانید. با ۱۱۵ تماس بگیرید و از اپراتور پیروی کنید.", color = sub, fontSize = 11.sp)
     }
@@ -305,15 +362,15 @@ private fun StepVisualV2(group: PatientGroup, id: String) {
     }
     val resource = remember(data.second) { ctx.resources.getIdentifier(data.second, "drawable", ctx.packageName) }
     var zoom by remember { mutableStateOf(0) }
-    Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color(0xFFEAF3FF)), shape = RoundedCornerShape(18.dp)) {
-        Column(Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(data.first, color = Color(0xFF073A91), fontWeight = FontWeight.Bold)
-            if (resource != 0) Image(painterResource(resource), data.first, Modifier.fillMaxWidth().height(175.dp).clickable { zoom = resource }, contentScale = ContentScale.Fit)
+    Card(Modifier.fillMaxWidth().border(1.dp, NeonCyan.copy(alpha=.7f), RoundedCornerShape(22.dp)), colors = CardDefaults.cardColors(containerColor = Color(0xFF0A2E57)), shape = RoundedCornerShape(22.dp)) {
+        Column(Modifier.padding(14.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(data.first, color = Color(0xFF65E9F0), fontWeight = FontWeight.Bold)
+            if (resource != 0) Image(painterResource(resource), data.first, Modifier.fillMaxWidth().height(235.dp).clickable { zoom = resource }, contentScale = ContentScale.Fit)
             else if (id == "emergency") Icon(Icons.Filled.Call, contentDescription = data.first, tint = Color(0xFF0B62C8), modifier = Modifier.size(88.dp).padding(12.dp))
             else if (id == "response") Icon(Icons.Filled.Person, contentDescription = data.first, tint = Color(0xFF0B62C8), modifier = Modifier.size(88.dp).padding(12.dp))
             else if (id == "scene") Icon(Icons.Filled.Info, contentDescription = data.first, tint = Color(0xFF0B62C8), modifier = Modifier.size(88.dp).padding(12.dp))
             else Text("تصویر آموزشی در مرحله دریافت دارایی‌ها قرار می‌گیرد.", color = Color(0xFF31577D), modifier = Modifier.padding(20.dp))
-            Text(data.third, color = Color(0xFF17385F), fontSize = 12.sp, textAlign = TextAlign.Center)
+            Text(data.third, color = Color.White, fontSize = 12.sp, textAlign = TextAlign.Center)
         }
     }
     if (zoom != 0) Dialog(onDismissRequest = { zoom = 0 }, properties = DialogProperties(usePlatformDefaultWidth = false)) {
@@ -347,8 +404,8 @@ private fun LicensedGuideV2(dark: Boolean, back: () -> Unit, home: () -> Unit) {
         Triple("وضعیت ریکاوری", "guide_recovery_position", "فقط با تنفس طبیعی و نبود منع.")
     )
     var zoom by remember { mutableStateOf(0) }
-    Column(Modifier.fillMaxSize().background(Brush.verticalGradient(bg)).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) { OutlinedButton(onClick = back) { Text("بازگشت") }; Spacer(Modifier.weight(1f)); TextButton(onClick = home) { Icon(Icons.Filled.Home, null); Text("صفحه اول") } }
+    Column(Modifier.fillMaxSize().medicalBackdrop(dark).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) { OutlinedButton(onClick = back, border=androidx.compose.foundation.BorderStroke(1.dp, NeonCyan)) { Text("بازگشت", color=Color.White) }; Spacer(Modifier.weight(1f)); BrandHomeButton(home) }
         Text("راهنمای استفاده و آموزش مراحل BLS", color = fg, fontSize = 21.sp, fontWeight = FontWeight.Black)
         Text("این بخش برای مطالعه و آشنایی پیش از شرایط اضطراری است. در حادثه واقعی ابتدا با ۱۱۵ تماس بگیرید و از دستور اپراتور پیروی کنید.", color = fg, fontSize = 13.sp)
         Text("راهنمای استفاده: در صفحه اول گروه سنی را انتخاب کنید؛ سپس نوع و تعداد امدادگران را مشخص کنید. هنگام احیا، صدا و شمارشگر خودکار اجرا می‌شوند. دکمه تکرار برای شنیدن دوباره دستور و دکمه مرحله قبل برای برگشت است. در صورت بازگشت علائم حیاتی، دکمه سبز را لمس کنید. دکمه صفحه اول در تمام صفحات برای خروج سریع در دسترس است.", color = fg, fontSize = 13.sp, lineHeight = 21.sp)
@@ -361,12 +418,12 @@ private fun LicensedGuideV2(dark: Boolean, back: () -> Unit, home: () -> Unit) {
 در همه گروه‌ها بازگشت کامل قفسه سینه و حداقل وقفه را رعایت کنید.""", color = fg, fontSize = 13.sp, lineHeight = 21.sp)
         items.forEach { item ->
             val r = remember(item.second) { ctx.resources.getIdentifier(item.second, "drawable", ctx.packageName) }
-            Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+            Card(Modifier.fillMaxWidth().border(1.dp, NeonCyan.copy(alpha=.55f), RoundedCornerShape(20.dp)), shape=RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFF0A2E57))) {
                 Column(Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(item.first, color = Color(0xFF073A91), fontWeight = FontWeight.Bold)
+                    Text(item.first, color = Color(0xFF65E9F0), fontWeight = FontWeight.Bold)
                     if (r != 0) Image(painterResource(r), item.first, Modifier.fillMaxWidth().height(180.dp).clickable { zoom = r }, contentScale = ContentScale.Fit)
                     else Text("تصویر در مرحله دریافت دارایی‌ها قرار می‌گیرد.", color = Color(0xFF31577D), modifier = Modifier.padding(18.dp))
-                    Text(item.third, color = Color(0xFF17385F), fontSize = 12.sp)
+                    Text(item.third, color = Color.White, fontSize = 12.sp)
                 }
             }
         }
@@ -396,20 +453,20 @@ private fun PostRoscV2(dark: Boolean, back: () -> Unit, restart: () -> Unit, hom
         "پایش مداوم" to "تنفس و هوشیاری را مرتب بررسی کنید و بیمار را تنها نگذارید.",
         "بدحال‌شدن مجدد" to "اگر بیهوش شد و تنفس طبیعی نداشت، فوراً احیا را از سر بگیرید."
     )
-    Column(Modifier.fillMaxSize().background(Brush.verticalGradient(bg)).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(Modifier.fillMaxSize().medicalBackdrop(dark).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             OutlinedButton(onClick = back) { Text("بازگشت به راهنمای احیا") }
-            TextButton(onClick = home) { Icon(Icons.Filled.Home, null); Text("صفحه اول") }
+            BrandHomeButton(home)
         }
         Text("مراقبت پس از بازگشت علائم حیاتی", color = fg, fontSize = 21.sp, fontWeight = FontWeight.Black)
         Text("این صفحه راهنمای صوتی ندارد؛ مراحل را بخوانید و بیمار را پیوسته پایش کنید.", color = fg, fontSize = 12.sp)
         steps.forEachIndexed { i, item ->
-            Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+            Card(Modifier.fillMaxWidth().border(1.dp, NeonCyan.copy(alpha=.55f), RoundedCornerShape(20.dp)), shape=RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFF0A2E57))) {
                 Row(Modifier.padding(14.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text((i + 1).toString(), color = Color.White, modifier = Modifier.background(Color(0xFF0B62C8), RoundedCornerShape(22.dp)).padding(10.dp), fontWeight = FontWeight.Black)
                     Column(Modifier.weight(1f)) {
-                        Text(item.first, color = Color(0xFF073A91), fontWeight = FontWeight.Bold)
-                        Text(item.second, color = Color(0xFF17385F), fontSize = 12.sp)
+                        Text(item.first, color = Color(0xFF65E9F0), fontWeight = FontWeight.Bold)
+                        Text(item.second, color = Color.White, fontSize = 12.sp)
                         if (i == 2 && recovery != 0) Image(painterResource(recovery), "وضعیت ریکاوری", Modifier.fillMaxWidth().height(130.dp), contentScale = ContentScale.Fit)
                     }
                 }
