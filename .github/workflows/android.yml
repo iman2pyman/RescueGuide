@@ -84,10 +84,11 @@ jobs:
       - name: Package complete source
         if: success()
         run: |
-          zip -qr RescueGuide-0.36.0-dev-FULL-SOURCE.zip . \
+          zip -qr RescueGuide-0.37.0-dev-FULL-SOURCE.zip . \
             -x ".git/*" ".gradle/*" ".kotlin/*" "*/build/*" "build/*" \
+               "*.jks" "*.keystore" "keystore.properties" \
                "RescueGuide-0.33.0-dev-FINAL-SOURCE.zip" \
-               "RescueGuide-0.36.0-dev-FULL-SOURCE.zip" \
+               "RescueGuide-0.37.0-dev-FULL-SOURCE.zip" \
                "SOURCE_FILES_SHA256.txt"
 
       - name: Upload complete source
@@ -95,7 +96,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: rescueguide-full-source
-          path: RescueGuide-0.36.0-dev-FULL-SOURCE.zip
+          path: RescueGuide-0.37.0-dev-FULL-SOURCE.zip
           if-no-files-found: error
           retention-days: 30
 
@@ -115,5 +116,57 @@ jobs:
         with:
           name: rescueguide-debug-apk
           path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Check whether release signing secrets are configured
+        id: release-signing
+        shell: bash
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [[ -n "$KEYSTORE_B64" && -n "$KEYSTORE_PASSWORD" && -n "$KEY_ALIAS" && -n "$KEY_PASSWORD" ]]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "Release build skipped: configure all four ANDROID_* repository secrets."
+          fi
+
+      - name: Restore persistent release keystore
+        if: steps.release-signing.outputs.ready == 'true'
+        shell: bash
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          set -euo pipefail
+          KEYSTORE_PATH="$RUNNER_TEMP/rescueguide-release.jks"
+          echo "$KEYSTORE_B64" | base64 --decode > "$KEYSTORE_PATH"
+          test -s "$KEYSTORE_PATH"
+          echo "ANDROID_KEYSTORE_FILE=$KEYSTORE_PATH" >> "$GITHUB_ENV"
+
+      - name: Assemble signed release APK
+        if: steps.release-signing.outputs.ready == 'true'
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: gradle --no-daemon --stacktrace :app:assembleRelease
+
+      - name: Verify release APK signature
+        if: steps.release-signing.outputs.ready == 'true'
+        run: |
+          APK="$(find app/build/outputs/apk/release -name '*.apk' -print -quit)"
+          test -n "$APK"
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose "$APK"
+
+      - name: Upload signed release APK
+        if: steps.release-signing.outputs.ready == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: rescueguide-signed-release-apk
+          path: app/build/outputs/apk/release/*.apk
           if-no-files-found: error
           retention-days: 30
