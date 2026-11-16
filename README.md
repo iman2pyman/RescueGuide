@@ -14,6 +14,8 @@
 - آیکن اختصاصی RescueGuide و شماره‌گیر اورژانس ایران ۱۱۵.
 
 ## مستندات
+- [راهنمای راه‌اندازی پرداخت کافه‌بازار](docs/BAZAAR_BILLING_SETUP_FA.md)
+- [راهنمای امن امضای نسخه Release](docs/ANDROID_SIGNING_SETUP_FA.md)
 - [راهنمای استفاده فارسی](docs/APP_USAGE_FA.md)
 - [وضعیت توسعه و محدودیت‌ها](PROJECT_STATUS.md)
 - [منابع علمی](docs/CLINICAL_SOURCES.md)
